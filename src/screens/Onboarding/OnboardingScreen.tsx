@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { Box, Text, VStack, Image, HStack, Heading, Center, useTheme } from 'native-base';
+import { Box, Text, VStack, Image, HStack, Heading, Center, useTheme, Icon } from 'native-base';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { Ionicons } from '@expo/vector-icons';
 
 import { Button } from '../../components/ui/Button';
 import { RootStackParamList } from '../../types';
@@ -13,17 +14,17 @@ const slides = [
   {
     title: 'コーヒーの味を言葉にする',
     description: '直感的な質問に答えるだけで、あなたの好みを専門的に表現できるようになります',
-    imageSource: require('../../assets/onboarding1.png'), // 後でアセットを追加
+    icon: 'cafe', // Ioniconsのアイコン名
   },
   {
     title: 'あなただけの味覚辞典',
     description: '日々のコーヒーが、あなたの味覚辞典を作ります。専門用語を自分の言葉で理解しましょう',
-    imageSource: require('../../assets/onboarding2.png'), // 後でアセットを追加
+    icon: 'book',
   },
   {
     title: '好みを発見する',
     description: '記録を続けることで、あなたの好みの傾向が見えてきます。新たな発見の旅に出かけましょう',
-    imageSource: require('../../assets/onboarding3.png'), // 後でアセットを追加
+    icon: 'heart',
   },
 ];
 
@@ -66,11 +67,11 @@ const OnboardingScreen: React.FC = () => {
         </Heading>
 
         <Center flex={1} justifyContent="center">
-          <Image
-            source={slides[currentSlide].imageSource}
-            alt={`Onboarding slide ${currentSlide + 1}`}
-            size="xl"
-            resizeMode="contain"
+          <Icon
+            as={Ionicons}
+            name={slides[currentSlide].icon}
+            size="6xl"
+            color={COLORS.primary[500]}
           />
         </Center>
 
