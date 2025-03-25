@@ -35,7 +35,7 @@ module.exports = {
     '<rootDir>/ios/'
   ],
   setupFiles: ['<rootDir>/jest.setup.js'],
-  testEnvironment: 'node',
+  testEnvironment: process.env.TEST_ENV === 'jsdom' ? 'jsdom' : 'node',
   coveragePathIgnorePatterns: [
     '<rootDir>/node_modules/',
     '<rootDir>/src/__mocks__/'
