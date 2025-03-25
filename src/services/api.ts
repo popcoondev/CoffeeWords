@@ -4,6 +4,12 @@ import { httpsCallable } from 'firebase/functions';
 import { db, storage, functions } from './firebase';
 import { User, CoffeeRecord, DictionaryEntry, AILanguageResponse } from '../types';
 
+/**
+ * レガシーAPIモジュール
+ * 注意: 新しいコードでは、useFirestore、useCoffeeStorage、useDictionaryフックを使用してください。
+ * このモジュールは後方互換性のために残されています。
+ */
+
 // ユーザー関連API
 export const userAPI = {
   createUser: async (uid: string, userData: Partial<User>): Promise<void> => {
