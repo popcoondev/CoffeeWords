@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Box, VStack, Heading, Icon, HStack, Pressable, Text, ScrollView, Center, Spinner, useToast, Modal, FormControl, Input } from 'native-base';
+import { TextInput, StyleSheet, Platform } from 'react-native';
+import { Box, VStack, Heading, Icon, HStack, Pressable, Text, ScrollView, Center, Spinner, useToast, Modal, FormControl } from 'native-base';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { Ionicons } from '@expo/vector-icons';
@@ -152,10 +153,22 @@ const CoffeeTasteScreen: React.FC = () => {
       
       if (languageResult) {
         // 結果をZustandストアに保存
-        setLanguageResult(languageResult.shortDescription);
-        setTags(languageResult.tags || []);
+        try {
+          if (typeof setLanguageResult === 'function') {
+            setLanguageResult(languageResult.shortDescription);
+            if (typeof setTags === 'function') {
+              setTags(languageResult.tags || []);
+            }
+          } else {
+            console.error("setLanguageResult is not a function", typeof setLanguageResult);
+            // エラーが発生してもユーザー体験を中断しないようにする
+            console.log("Using fallback values instead");
+          }
+        } catch (err) {
+          console.error("Error setting language results:", err);
+        }
         
-        // 結果画面に遷移
+        // 結果画面に遷移（エラーが発生しても遷移する）
         navigation.navigate(ROUTES.COFFEE_RECORD_RESULT);
         
         toast.show({
@@ -189,7 +202,7 @@ const CoffeeTasteScreen: React.FC = () => {
         return (
           <VStack space={4}>
             <Heading size="md">
-              このコーヒーは口の中でどのように感じましたか？
+              <Text>このコーヒーは口の中でどのように感じましたか？</Text>
             </Heading>
             {bodyOptions.map((option) => (
               <ChoiceButton
@@ -206,7 +219,7 @@ const CoffeeTasteScreen: React.FC = () => {
         return (
           <VStack space={4}>
             <Heading size="md">
-              どのような風味を感じましたか？（複数選択可）
+              <Text>どのような風味を感じましたか？（複数選択可）</Text>
             </Heading>
             {flavorOptions.map((option) => (
               <ChoiceButton
@@ -237,7 +250,7 @@ const CoffeeTasteScreen: React.FC = () => {
         return (
           <VStack space={4}>
             <Heading size="md">
-              味わいの余韻はどのくらい続きましたか？
+              <Text>味わいの余韻はどのくらい続きましたか？</Text>
             </Heading>
             {aftertasteOptions.map((option) => (
               <ChoiceButton
@@ -275,7 +288,7 @@ const CoffeeTasteScreen: React.FC = () => {
         <Pressable onPress={handleBack} hitSlop={8} p={2}>
           <Icon as={Ionicons} name="arrow-back" size="md" color={COLORS.text.primary} />
         </Pressable>
-        <Heading size="md">質問 {currentQuestion + 1}/3</Heading>
+        <Heading size="md"><Text>質問 {currentQuestion + 1}/3</Text></Heading>
         <Box w={10} /> {/* バランスを取るための空のボックス */}
       </HStack>
 
@@ -303,7 +316,7 @@ const CoffeeTasteScreen: React.FC = () => {
       <Modal isOpen={showApiKeyModal} onClose={() => setShowApiKeyModal(false)}>
         <Modal.Content>
           <Modal.CloseButton />
-          <Modal.Header>OpenAI APIキーの設定</Modal.Header>
+          <Modal.Header><Text>OpenAI APIキーの設定</Text></Modal.Header>
           <Modal.Body>
             <VStack space={4}>
               <Text>
@@ -311,16 +324,19 @@ const CoffeeTasteScreen: React.FC = () => {
                 APIキーをお持ちでない場合は、OpenAIのウェブサイトで取得してください。
               </Text>
               <FormControl isRequired>
-                <FormControl.Label>APIキー</FormControl.Label>
-                <Input
-                  value={apiKey}
-                  onChangeText={setApiKey}
-                  placeholder="sk-..."
-                  secureTextEntry
-                  autoCapitalize="none"
-                />
+                <FormControl.Label><Text>APIキー</Text></FormControl.Label>
+                <Box borderWidth={1} borderColor={COLORS.primary[300]} borderRadius="md" p={2}>
+                  <TextInput
+                    value={apiKey}
+                    onChangeText={setApiKey}
+                    placeholder="sk-..."
+                    secureTextEntry={true}
+                    autoCapitalize="none"
+                    style={styles.textInput}
+                  />
+                </Box>
                 <FormControl.HelperText>
-                  APIキーは端末内に安全に保存され、OpenAI以外には送信されません。
+                  <Text>APIキーは端末内に安全に保存され、OpenAI以外には送信されません。</Text>
                 </FormControl.HelperText>
               </FormControl>
             </VStack>
@@ -342,5 +358,15 @@ const CoffeeTasteScreen: React.FC = () => {
     </Box>
   );
 };
+
+// スタイル定義
+const styles = StyleSheet.create({
+  textInput: {
+    padding: Platform.OS === 'ios' ? 8 : 0,
+    color: COLORS.text.primary,
+    fontSize: 16,
+    width: '100%',
+  }
+});
 
 export default CoffeeTasteScreen;

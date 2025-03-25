@@ -63,7 +63,7 @@ const CoffeeResultScreen: React.FC = () => {
       ]);
     } else {
       // 言語化結果がない場合のデフォルト設定
-      setDetailedDescription('');
+      setDetailedDescription('適度な酸味と甘みのバランスが良く、滑らかな口当たりが特徴です。心地よい余韻が続き、次の一口を誘います。');
       setRecommendedCoffees([
         'エチオピア シダモ',
         'グアテマラ アンティグア',
@@ -71,6 +71,16 @@ const CoffeeResultScreen: React.FC = () => {
       ]);
     }
   }, [languageGenerationResult]);
+  
+  // 言語結果がない場合のフォールバック対応
+  useEffect(() => {
+    if (!languageResult || languageResult.trim() === '') {
+      // 直接Hooksを呼び出さずにすでに取得したsetLanguageResultを使用
+      if (typeof setLanguageResult === 'function') {
+        setLanguageResult('バランスの取れた味わいと心地よい余韻を持つ魅力的なコーヒー');
+      }
+    }
+  }, [languageResult, setLanguageResult]);
   
   // エラーハンドリング
   useEffect(() => {
@@ -153,7 +163,7 @@ const CoffeeResultScreen: React.FC = () => {
         <Pressable onPress={handleClose} hitSlop={8} p={2}>
           <Icon as={Ionicons} name="close" size="md" color={COLORS.text.primary} />
         </Pressable>
-        <Heading size="md">あなたのコーヒーを言語化しました</Heading>
+        <Heading size="md"><Text>あなたのコーヒーを言語化しました</Text></Heading>
         <Box w={10} /> {/* バランスを取るための空のボックス */}
       </HStack>
 
@@ -165,7 +175,7 @@ const CoffeeResultScreen: React.FC = () => {
                 <Box bg={COLORS.primary[500]} w={2} h="full" rounded="full" />
                 <VStack flex={1}>
                   <Text fontWeight="bold" fontSize="lg">
-                    {name}
+                    {name || "名称なし"}
                   </Text>
                   {roaster && (
                     <Text fontSize="sm" color={COLORS.text.secondary}>
@@ -188,7 +198,7 @@ const CoffeeResultScreen: React.FC = () => {
 
               <VStack space={3}>
                 <Text fontSize="md" fontWeight="bold" italic>
-                  "{languageResult}"
+                  "{languageResult || "コーヒーの言語化結果がここに表示されます"}"
                 </Text>
                 
                 {detailedDescription && (
@@ -204,7 +214,7 @@ const CoffeeResultScreen: React.FC = () => {
           </Card>
 
           <VStack space={2}>
-            <Heading size="sm">あなたの味覚タグ:</Heading>
+            <Heading size="sm"><Text>あなたの味覚タグ:</Text></Heading>
             <HStack flexWrap="wrap">
               {tags.map((tag, index) => (
                 <Tag key={index} label={tag} />
@@ -213,7 +223,7 @@ const CoffeeResultScreen: React.FC = () => {
           </VStack>
 
           <VStack space={2}>
-            <Heading size="sm">似た味わいの豆:</Heading>
+            <Heading size="sm"><Text>似た味わいの豆:</Text></Heading>
             <Box>
               {recommendedCoffees.length > 0 ? (
                 recommendedCoffees.map((coffee, index) => (

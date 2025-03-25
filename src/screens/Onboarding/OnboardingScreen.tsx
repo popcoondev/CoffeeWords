@@ -63,7 +63,7 @@ const OnboardingScreen: React.FC = () => {
     <Box flex={1} bg={COLORS.background.primary} safeArea>
       <VStack flex={1} px={6} justifyContent="center" space={6}>
         <Heading textAlign="center" mb={2}>
-          Coffee Words
+          <Text>Coffee Words</Text>
         </Heading>
 
         <Center flex={1} justifyContent="center">
@@ -77,7 +77,7 @@ const OnboardingScreen: React.FC = () => {
 
         <VStack flex={1} space={4}>
           <Heading size="md" textAlign="center">
-            {slides[currentSlide].title}
+            <Text>{slides[currentSlide].title}</Text>
           </Heading>
           
           <Text textAlign="center" px={4}>
