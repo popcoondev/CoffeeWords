@@ -15,13 +15,6 @@ if (process.env.OPENAI_API_KEY) {
   console.log('No OPENAI_API_KEY found, using mock');
 }
 
-// モックテスト実行時に環境変数をクリア（test:mockスクリプト用）
-if (process.env.npm_lifecycle_event === 'test:mock') {
-  console.log('Running in test:mock mode, clearing API key');
-  delete process.env.OPENAI_API_KEY;
-  process.env.ENABLE_API_TESTS = 'false';
-}
-
 // react-nativeのPlatform.OSをモックする
 jest.mock('react-native/Libraries/Utilities/Platform', () => ({
   OS: 'ios', // またはandroid、テストに合わせて変更
