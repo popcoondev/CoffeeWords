@@ -15,6 +15,14 @@ if (process.env.OPENAI_API_KEY) {
   console.log('No OPENAI_API_KEY found, using mock');
 }
 
+// Firebase設定のログ
+if (process.env.FIREBASE_API_KEY && process.env.FIREBASE_PROJECT_ID) {
+  console.log('Using Firebase configuration from process.env');
+  console.log(`Firebase Project ID: ${process.env.FIREBASE_PROJECT_ID}`);
+} else {
+  console.log('No Firebase configuration found, using mock values');
+}
+
 // react-nativeのPlatform.OSをモックする
 jest.mock('react-native/Libraries/Utilities/Platform', () => ({
   OS: 'ios', // またはandroid、テストに合わせて変更

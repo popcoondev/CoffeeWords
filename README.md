@@ -31,6 +31,7 @@ Coffee Wordsは、コーヒー愛好家が自分の味覚を適切な言葉で�
 - npm または yarn
 - Expo CLI
 - Firebase プロジェクト
+- OpenAI API キー
 
 ### インストール
 
@@ -47,26 +48,63 @@ cd CoffeeWords
 npm install
 ```
 
-3. Firebase設定
+3. 環境変数の設定
 
-`src/services/firebase.ts`のfirebaseConfigを実際のプロジェクト設定に更新してください。
+`.env.example`ファイルをコピーして`.env`ファイルを作成し、必要な値を設定します：
 
-```typescript
-const firebaseConfig = {
-  apiKey: "YOUR_API_KEY",
-  authDomain: "YOUR_AUTH_DOMAIN",
-  projectId: "YOUR_PROJECT_ID",
-  storageBucket: "YOUR_STORAGE_BUCKET",
-  messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-  appId: "YOUR_APP_ID",
-  measurementId: "YOUR_MEASUREMENT_ID"
-};
+```bash
+cp .env.example .env
 ```
 
-4. アプリの起動
+```
+# OpenAI API Key
+OPENAI_API_KEY=your_openai_api_key_here
+
+# Firebase Configuration
+FIREBASE_API_KEY=your_firebase_api_key_here
+FIREBASE_AUTH_DOMAIN=your-project-id.firebaseapp.com
+FIREBASE_PROJECT_ID=your-project-id
+FIREBASE_STORAGE_BUCKET=your-project-id.appspot.com
+FIREBASE_MESSAGING_SENDER_ID=your_messaging_sender_id
+FIREBASE_APP_ID=your_firebase_app_id
+FIREBASE_MEASUREMENT_ID=your_measurement_id
+```
+
+4. Firebaseプロジェクトのセットアップ
+
+Firebaseプロジェクトの詳細なセットアップについては、[Firebase Setup Guide](docs/firebase_setup.md)を参照してください。
+
+5. アプリの起動
 
 ```bash
 npx expo start
+```
+
+## テスト
+
+テストを実行するには、まず`.env.test.example`ファイルをコピーして`.env.test`ファイルを作成します：
+
+```bash
+cp .env.test.example .env.test
+```
+
+次に、各種テストを実行できます：
+
+```bash
+# すべてのテストを実行
+npm run test
+
+# 変更を監視しながらテストを実行
+npm run test:watch
+
+# OpenAI APIテストを実行（実際のAPI呼び出しあり）
+npm run test:live
+
+# UIテストを実行
+npm run test:ui
+
+# フローテストを実行
+npm run test:flows
 ```
 
 ## プロジェクト構造
@@ -85,6 +123,12 @@ CoffeeWords/
 │   ├── store/         # Zustandストア
 │   ├── types/         # TypeScript型定義
 │   └── utils/         # ユーティリティ関数
+├── __tests__/         # テストファイル
+│   ├── flows/         # フローテスト
+│   ├── navigation/    # ナビゲーションテスト
+│   ├── screens/       # 画面テスト
+│   └── services/      # サービステスト
+├── docs/              # ドキュメント
 ├── App.tsx            # アプリのエントリーポイント
 └── package.json       # プロジェクト依存関係
 ```

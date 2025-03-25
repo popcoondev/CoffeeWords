@@ -6,17 +6,35 @@ import { getFunctions } from 'firebase/functions';
 import { getAnalytics, isSupported } from 'firebase/analytics';
 import ReactNativeAsyncStorage from '@react-native-async-storage/async-storage';
 
+// environment variables (from react-native-dotenv)
+import {
+  FIREBASE_API_KEY,
+  FIREBASE_AUTH_DOMAIN,
+  FIREBASE_PROJECT_ID,
+  FIREBASE_STORAGE_BUCKET,
+  FIREBASE_MESSAGING_SENDER_ID,
+  FIREBASE_APP_ID,
+  FIREBASE_MEASUREMENT_ID
+} from '@env';
+
 // Firebase設定
-// 注: 実際の設定値は環境変数または安全な場所から読み込むべきです
 const firebaseConfig = {
-  apiKey: "YOUR_API_KEY",
-  authDomain: "YOUR_AUTH_DOMAIN",
-  projectId: "YOUR_PROJECT_ID",
-  storageBucket: "YOUR_STORAGE_BUCKET",
-  messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-  appId: "YOUR_APP_ID",
-  measurementId: "YOUR_MEASUREMENT_ID"
+  apiKey: FIREBASE_API_KEY,
+  authDomain: FIREBASE_AUTH_DOMAIN,
+  projectId: FIREBASE_PROJECT_ID,
+  storageBucket: FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: FIREBASE_MESSAGING_SENDER_ID,
+  appId: FIREBASE_APP_ID,
+  measurementId: FIREBASE_MEASUREMENT_ID
 };
+
+// 設定値が存在するかチェック (少なくともapiKeyとprojectIdは必須)
+if (!firebaseConfig.apiKey || !firebaseConfig.projectId) {
+  console.warn(
+    'Firebase設定が不完全です。環境変数が正しく設定されているか確認してください。\n' +
+    '詳細: https://firebase.google.com/docs/web/setup'
+  );
+}
 
 // Firebaseの初期化
 const app = initializeApp(firebaseConfig);
