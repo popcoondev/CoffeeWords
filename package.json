@@ -12,8 +12,8 @@
     "test:live": "cross-env ENABLE_API_TESTS=true jest openai.integration.live.test.ts",
     "test:mock": "cross-env OPENAI_API_KEY= ENABLE_API_TESTS=false jest --testPathIgnorePatterns=openai.integration.live.test.ts --testPathPattern=services/openai",
     "test:coverage": "jest --coverage",
-    "test:flows": "cross-env TEST_ENV=jsdom jest --testPathPattern=flows",
-    "test:ui": "cross-env TEST_ENV=jsdom jest --testPathPattern=screens"
+    "test:flows": "cross-env TS_NODE_TRANSPILE_ONLY=1 TEST_ENV=jsdom jest --no-cache --testPathPattern=flows",
+    "test:ui": "cross-env TS_NODE_TRANSPILE_ONLY=1 TEST_ENV=jsdom jest --no-cache --testPathPattern=screens"
   },
   "dependencies": {
     "@expo/vector-icons": "^14.0.4",
@@ -39,6 +39,7 @@
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",
+    "@testing-library/jest-dom": "^6.6.3",
     "@testing-library/react-native": "^12.0.0",
     "@types/jest": "^29.5.12",
     "@types/node-fetch": "^2.6.4",

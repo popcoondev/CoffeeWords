@@ -17,8 +17,11 @@ module.exports = {
       'ts-jest',
       {
         tsconfig: 'tsconfig.json',
+        isolatedModules: true,
+        transpileOnly: true,
       },
     ],
+    '^.+\\.jsx?$': 'babel-jest',
   },
   moduleNameMapper: {
     // Expo-secureStoreをモックに置き換えるための設定

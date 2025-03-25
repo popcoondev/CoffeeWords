@@ -73,3 +73,13 @@ Object.defineProperty(global, 'TextEncoder', {
 Object.defineProperty(global, 'TextDecoder', {
   value: require('util').TextDecoder,
 });
+
+// JSDOMテスト環境の場合はextendに関する設定
+if (process.env.TEST_ENV === 'jsdom') {
+  try {
+    // @testing-library/jest-domの拡張を適用
+    require('@testing-library/jest-dom');
+  } catch (e) {
+    console.log('Jest-DOM extension could not be loaded:', e.message);
+  }
+}
