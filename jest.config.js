@@ -13,15 +13,7 @@ if (fs.existsSync(envPath)) {
 module.exports = {
   preset: 'jest-expo',
   transform: {
-    '^.+\\.tsx?$': [
-      'ts-jest',
-      {
-        tsconfig: 'tsconfig.json',
-        isolatedModules: true,
-        transpileOnly: true,
-      },
-    ],
-    '^.+\\.jsx?$': 'babel-jest',
+    '^.+\\.(ts|tsx|js|jsx)$': 'babel-jest',
   },
   moduleNameMapper: {
     // Expo-secureStoreをモックに置き換えるための設定

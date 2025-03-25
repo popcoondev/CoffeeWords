@@ -23,6 +23,7 @@ module.exports = function(api) {
       }],
       // テスト用の変換を追加
       isTest && '@babel/plugin-transform-modules-commonjs',
+      '@babel/plugin-transform-runtime',
     ].filter(Boolean)
   };
 };
