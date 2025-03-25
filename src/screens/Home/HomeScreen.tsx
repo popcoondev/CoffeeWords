@@ -1,5 +1,5 @@
 import React from 'react';
-import { ScrollView, Box, VStack, Heading, Text, HStack, Pressable, Icon } from 'native-base';
+import { ScrollView, Box, VStack, Heading, Text, HStack, Pressable, Icon, useToast } from 'native-base';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { Ionicons } from '@expo/vector-icons';
@@ -35,17 +35,24 @@ const recentDiscoveries = [
 
 const HomeScreen: React.FC = () => {
   const navigation = useNavigation<HomeNavigationProp>();
-
-  const handleRecordCoffee = () => {
-    navigation.navigate(ROUTES.COFFEE_RECORD_FLOW);
-  };
+  const toast = useToast();
 
   const handleTrainingDetails = () => {
     // 実装予定: トレーニング詳細画面へ
+    toast.show({
+      title: "準備中",
+      description: "この機能は近日公開予定です",
+      status: "info"
+    });
   };
 
   const handleDiscoveryPress = (id: string) => {
     // 実装予定: 発見詳細画面へ
+    toast.show({
+      title: "準備中",
+      description: `ID: ${id} の詳細は近日公開予定です`,
+      status: "info"
+    });
   };
 
   return (
@@ -53,7 +60,7 @@ const HomeScreen: React.FC = () => {
       <VStack space={6}>
         {/* 今日のトレーニング */}
         <VStack space={2}>
-          <Heading size="md">今日のトレーニング</Heading>
+          <Heading size="md"><Text>今日のトレーニング</Text></Heading>
           <Card>
             <VStack space={3}>
               <Text fontWeight="bold">{todayTraining.title}</Text>
@@ -68,7 +75,7 @@ const HomeScreen: React.FC = () => {
           </Card>
         </VStack>
 
-        {/* 今日のコーヒーを記録 */}
+        {/* 今日のコーヒーを記録 - FABに移行したため非表示
         <VStack space={2}>
           <Heading size="md">今日のコーヒーを記録</Heading>
           <Card>
@@ -86,14 +93,15 @@ const HomeScreen: React.FC = () => {
                 />
               </Box>
               <Text fontWeight="medium">コーヒーを飲んだらタップして記録</Text>
-              <Button label="記録する" onPress={handleRecordCoffee} />
+              <Button label="記録する" onPress={() => navigation.navigate(ROUTES.COFFEE_RECORD_FLOW)} />
             </VStack>
           </Card>
         </VStack>
+        */}
 
         {/* あなたの発見 */}
         <VStack space={2}>
-          <Heading size="md">あなたの発見</Heading>
+          <Heading size="md"><Text>あなたの発見</Text></Heading>
           <Card>
             <VStack divider={<Box bg={COLORS.text.light} h="1px" my={2} opacity={0.2} />}>
               {recentDiscoveries.map((discovery) => (

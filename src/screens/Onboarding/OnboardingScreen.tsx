@@ -39,7 +39,8 @@ const OnboardingScreen: React.FC = () => {
     if (currentSlide < slides.length - 1) {
       setCurrentSlide(currentSlide + 1);
     } else {
-      navigation.navigate(ROUTES.MAIN);
+      // 初回ユーザーは経験レベル設定画面へ遷移
+      navigation.navigate(ROUTES.EXPERIENCE_LEVEL);
     }
   };
 

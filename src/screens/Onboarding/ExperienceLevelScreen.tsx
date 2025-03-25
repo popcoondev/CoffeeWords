@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Box, VStack, Heading, Text, ScrollView } from 'native-base';
+import React, { useState, useEffect } from 'react';
+import { Box, VStack, Heading, Text, ScrollView, useToast } from 'native-base';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 
@@ -8,8 +8,10 @@ import { ChoiceButton } from '../../components/ui/ChoiceButton';
 import { RootStackParamList } from '../../types';
 import { ROUTES } from '../../constants/routes';
 import { COLORS } from '../../constants/theme';
+import { useAuth } from '../../hooks/useAuth';
+import LoadingScreen from '../../components/LoadingScreen';
 
-type ExperienceLevelNavigationProp = NativeStackNavigationProp<RootStackParamList, 'Onboarding'>;
+type ExperienceLevelNavigationProp = NativeStackNavigationProp<RootStackParamList, 'ExperienceLevel'>;
 
 const experienceLevels = [
   {
@@ -33,18 +35,68 @@ const experienceLevels = [
 ];
 
 const ExperienceLevelScreen: React.FC = () => {
+  const { user, updateUserProfile, loading } = useAuth();
   const [selectedLevel, setSelectedLevel] = useState<string | null>(null);
+  const [updating, setUpdating] = useState(false);
   const navigation = useNavigation<ExperienceLevelNavigationProp>();
+  const toast = useToast();
+
+  // 初期値の設定
+  useEffect(() => {
+    if (user?.experienceLevel) {
+      setSelectedLevel(user.experienceLevel);
+    }
+  }, [user]);
 
   const handleLevelSelect = (level: string) => {
     setSelectedLevel(level);
   };
 
-  const handleNext = () => {
-    // 実際の実装では選択された経験レベルを保存する
-    // ここでは簡略化のために次の画面に進むだけ
-    navigation.navigate(ROUTES.MAIN);
+  const handleNext = async () => {
+    if (!selectedLevel) return;
+    
+    try {
+      setUpdating(true);
+      
+      // 経験レベルをユーザープロファイルに保存
+      if (user) {
+        const success = await updateUserProfile({ 
+          experienceLevel: selectedLevel 
+        });
+        
+        if (success) {
+          toast.show({
+            title: "設定完了",
+            description: "コーヒー体験レベルを設定しました",
+            status: "success"
+          });
+        } else {
+          toast.show({
+            title: "エラー",
+            description: "設定の保存に失敗しました",
+            status: "error"
+          });
+        }
+      }
+      
+      // メイン画面に遷移
+      navigation.navigate(ROUTES.MAIN);
+    } catch (error) {
+      console.error("Error saving experience level:", error);
+      toast.show({
+        title: "エラー",
+        description: "予期せぬエラーが発生しました",
+        status: "error"
+      });
+    } finally {
+      setUpdating(false);
+    }
   };
+
+  // ローディング中はローディング画面を表示
+  if (loading || updating) {
+    return <LoadingScreen message={updating ? "設定を保存しています..." : "読み込み中..."} />;
+  }
 
   return (
     <Box flex={1} bg={COLORS.background.primary} safeArea>
@@ -52,7 +104,7 @@ const ExperienceLevelScreen: React.FC = () => {
         <VStack space={6} mt={8}>
           <VStack space={2}>
             <Heading textAlign="center" size="lg">
-              あなたのコーヒー体験レベルは？
+              <Text>あなたのコーヒー体験レベルは？</Text>
             </Heading>
             <Text textAlign="center" color={COLORS.text.secondary}>
               あなたに最適なトレーニングをご用意します
