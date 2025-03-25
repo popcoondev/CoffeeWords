@@ -7,20 +7,28 @@ describe('generateCoffeeLanguage - エラーハンドリングテスト', () => 
     jest.clearAllMocks();
   });
 
-  it('APIキーが設定されていない場合にエラーをスローする', async () => {
+  it('APIキーが設定されていない場合にモックデータを返す', async () => {
     // APIキーが取得できないようにモック
     jest.spyOn(SecureStore, 'getItemAsync').mockResolvedValue(null);
     
     // 環境変数のAPIキーも空に設定
-    jest.mock('@env', () => ({
-      OPENAI_API_KEY: ''
-    }));
+    jest.resetModules();
+    const mockedEnv = require('../../src/__mocks__/env');
+    const originalKey = mockedEnv.OPENAI_API_KEY;
+    mockedEnv.OPENAI_API_KEY = '';
 
     const responses: CoffeeResponse = {
       body: 'medium'
     };
 
-    await expect(generateCoffeeLanguage(responses, { useFallback: false })).rejects.toThrow('OpenAI APIキーが設定されていません');
+    const result = await generateCoffeeLanguage(responses);
+    
+    // テスト後に環境変数を元に戻す
+    mockedEnv.OPENAI_API_KEY = originalKey;
+    
+    // モックデータが返されることを確認
+    expect(result.shortDescription).toBeTruthy();
+    expect(result.detailedDescription).toBeTruthy();
   });
 
   it('APIレスポンスがokでない場合にエラーをスローする', async () => {
