@@ -4,13 +4,22 @@ global.fetch = jest.fn();
 // console.errorをモックして不要なエラーメッセージをテスト出力から除外
 console.error = jest.fn();
 
-// .env.testから環境変数を設定
+// 環境変数の設定状況をログに記録
 if (process.env.OPENAI_API_KEY) {
   console.log('Using OPENAI_API_KEY from process.env');
   // APIキーがマスクされた形式でログに残す
   const maskedKey = process.env.OPENAI_API_KEY.substring(0, 5) + '...' + 
                     process.env.OPENAI_API_KEY.substring(process.env.OPENAI_API_KEY.length - 4);
   console.log(`API Key: ${maskedKey}`);
+} else {
+  console.log('No OPENAI_API_KEY found, using mock');
+}
+
+// モックテスト実行時に環境変数をクリア（test:mockスクリプト用）
+if (process.env.npm_lifecycle_event === 'test:mock') {
+  console.log('Running in test:mock mode, clearing API key');
+  process.env.OPENAI_API_KEY = '';
+  process.env.ENABLE_API_TESTS = 'false';
 }
 
 // react-nativeのPlatform.OSをモックする

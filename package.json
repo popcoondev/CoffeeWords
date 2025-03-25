@@ -10,6 +10,7 @@
     "test": "jest",
     "test:watch": "jest --watch",
     "test:live": "cross-env ENABLE_API_TESTS=true jest openai.integration.live.test.ts",
+    "test:mock": "cross-env OPENAI_API_KEY= ENABLE_API_TESTS=false jest --testPathIgnorePatterns=openai.integration.live.test.ts --testPathPattern=services/openai",
     "test:coverage": "jest --coverage"
   },
   "dependencies": {
