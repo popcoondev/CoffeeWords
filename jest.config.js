@@ -1,3 +1,15 @@
+// dotenvの読み込み
+const dotenv = require('dotenv');
+const fs = require('fs');
+const path = require('path');
+
+// .env.testファイルの読み込み
+const envPath = path.resolve(__dirname, '.env.test');
+if (fs.existsSync(envPath)) {
+  console.log('Loading environment variables from .env.test for Jest config');
+  dotenv.config({ path: envPath });
+}
+
 module.exports = {
   preset: 'jest-expo',
   transform: {
@@ -27,5 +39,12 @@ module.exports = {
   coveragePathIgnorePatterns: [
     '<rootDir>/node_modules/',
     '<rootDir>/src/__mocks__/'
-  ]
+  ],
+  // テスト実行時に環境変数を設定
+  testEnvironmentOptions: {
+    env: {
+      OPENAI_API_KEY: process.env.OPENAI_API_KEY,
+      ENABLE_API_TESTS: process.env.ENABLE_API_TESTS
+    }
+  }
 };

@@ -4,6 +4,15 @@ global.fetch = jest.fn();
 // console.errorをモックして不要なエラーメッセージをテスト出力から除外
 console.error = jest.fn();
 
+// .env.testから環境変数を設定
+if (process.env.OPENAI_API_KEY) {
+  console.log('Using OPENAI_API_KEY from process.env');
+  // APIキーがマスクされた形式でログに残す
+  const maskedKey = process.env.OPENAI_API_KEY.substring(0, 5) + '...' + 
+                    process.env.OPENAI_API_KEY.substring(process.env.OPENAI_API_KEY.length - 4);
+  console.log(`API Key: ${maskedKey}`);
+}
+
 // react-nativeのPlatform.OSをモックする
 jest.mock('react-native/Libraries/Utilities/Platform', () => ({
   OS: 'ios', // またはandroid、テストに合わせて変更
