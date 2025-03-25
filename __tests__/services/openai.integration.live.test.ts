@@ -32,7 +32,7 @@ jest.unmock('../../src/services/openai.ts');
   });
 
   // タイムアウトを長めに設定（APIコールに時間がかかる場合があるため）
-  jest.setTimeout(30000);
+  jest.setTimeout(60000);
 
   it('light bodyのコーヒーをAPIで言語化できる', async () => {
     const responses: CoffeeResponse = {

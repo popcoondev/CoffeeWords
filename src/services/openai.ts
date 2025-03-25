@@ -155,9 +155,9 @@ export const generateCoffeeLanguage = async (
     const prompt = buildCoffeePrompt(responses);
     
     try {
-      // リクエストタイムアウトの設定（8秒）
+      // リクエストタイムアウトの設定（20秒）
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 8000);
+      const timeoutId = setTimeout(() => controller.abort(), 20000);
       
       const response = await fetch('https://api.openai.com/v1/chat/completions', {
         method: 'POST',
