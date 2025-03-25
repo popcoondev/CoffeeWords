@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Box, VStack, Heading, Icon, HStack, Pressable, Text, ScrollView, Center, Spinner } from 'native-base';
+import { Box, VStack, Heading, Icon, HStack, Pressable, Text, ScrollView, Center, Spinner, useToast } from 'native-base';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { Ionicons } from '@expo/vector-icons';
@@ -11,6 +11,7 @@ import { RootStackParamList } from '../../types';
 import { ROUTES } from '../../constants/routes';
 import { COLORS } from '../../constants/theme';
 import { useCoffeeRecord } from '../../hooks/useCoffeeRecord';
+import { useCoffeeStorage } from '../../hooks/useCoffeeStorage';
 
 type CoffeeTasteNavigationProp = NativeStackNavigationProp<RootStackParamList, 'CoffeeRecordFlow'>;
 
@@ -37,17 +38,28 @@ const aftertasteOptions = [
 
 const CoffeeTasteScreen: React.FC = () => {
   const navigation = useNavigation<CoffeeTasteNavigationProp>();
+  const toast = useToast();
+  
+  // 従来のZustandのステート管理
   const {
+    name,
+    roaster,
+    photoURL,
     body,
     flavor,
     aftertaste,
     setBody,
     setFlavor,
     setAftertaste,
-    generateLanguage,
+    setLanguageResult,
+    setTags,
     isSubmitting,
   } = useCoffeeRecord();
   
+  // Firebase連携のためのフック
+  const { generateLanguage, loading: firebaseLoading, error: firebaseError } = useCoffeeStorage();
+  
+  // ローカルステート
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [isGenerating, setIsGenerating] = useState(false);
 
@@ -79,9 +91,47 @@ const CoffeeTasteScreen: React.FC = () => {
   // 言語化生成
   const handleGenerateLanguage = async () => {
     setIsGenerating(true);
-    await generateLanguage();
-    setIsGenerating(false);
-    navigation.navigate(ROUTES.COFFEE_RECORD_RESULT);
+    
+    try {
+      // Firebase AIサービスを使用して言語化を生成
+      const responses = {
+        body,
+        flavor,
+        aftertaste
+      };
+      
+      const result = await generateLanguage(responses);
+      
+      if (result) {
+        // 結果をZustandストアに保存
+        setLanguageResult(result.text);
+        setTags(result.tags || []);
+        
+        // 結果画面に遷移
+        navigation.navigate(ROUTES.COFFEE_RECORD_RESULT);
+        
+        toast.show({
+          title: "言語化完了",
+          description: "あなたのコーヒー体験を言語化しました",
+          status: "success"
+        });
+      } else {
+        toast.show({
+          title: "エラー",
+          description: "言語化の生成に失敗しました。もう一度お試しください。",
+          status: "error"
+        });
+      }
+    } catch (error) {
+      console.error("Language generation error:", error);
+      toast.show({
+        title: "エラー",
+        description: firebaseError || "言語化の生成に失敗しました",
+        status: "error"
+      });
+    } finally {
+      setIsGenerating(false);
+    }
   };
 
   // 現在の質問に応じたコンテンツをレンダリング

@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Box, VStack, Heading, Icon, HStack, Pressable, Text, ScrollView, Center, Spinner } from 'native-base';
+import React, { useState, useEffect } from 'react';
+import { Box, VStack, Heading, Icon, HStack, Pressable, Text, ScrollView, Center, Spinner, Image, useToast } from 'native-base';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { Ionicons } from '@expo/vector-icons';
@@ -11,21 +11,56 @@ import { RootStackParamList } from '../../types';
 import { ROUTES } from '../../constants/routes';
 import { COLORS } from '../../constants/theme';
 import { useCoffeeRecord } from '../../hooks/useCoffeeRecord';
+import { useCoffeeStorage } from '../../hooks/useCoffeeStorage';
+import { useAuth } from '../../hooks/useAuth';
 
 type CoffeeResultNavigationProp = NativeStackNavigationProp<RootStackParamList, 'CoffeeRecordResult'>;
 
 const CoffeeResultScreen: React.FC = () => {
   const navigation = useNavigation<CoffeeResultNavigationProp>();
+  const toast = useToast();
+  const { user } = useAuth();
+  
+  // 従来のZustandのステート管理
   const {
     name,
     roaster,
+    photoURL,
+    body,
+    flavor,
+    aftertaste,
     languageResult,
     tags,
-    saveRecord,
     resetForm,
     isSubmitting,
   } = useCoffeeRecord();
+  
+  // Firebase連携のためのフック
+  const { 
+    createRecord, 
+    loading: firebaseLoading, 
+    error: firebaseError 
+  } = useCoffeeStorage();
+  
+  // ローカルステート
   const [isSaving, setIsSaving] = useState(false);
+  const [recordId, setRecordId] = useState<string | null>(null);
+  const [similarCoffees, setSimilarCoffees] = useState<string[]>([
+    'エチオピア シダモ',
+    'グアテマラ アンティグア',
+    'コロンビア ウイラ',
+  ]);
+  
+  // エラーハンドリング
+  useEffect(() => {
+    if (firebaseError) {
+      toast.show({
+        title: "エラー",
+        description: firebaseError,
+        status: "error"
+      });
+    }
+  }, [firebaseError, toast]);
 
   const handleClose = () => {
     resetForm();
@@ -33,22 +68,63 @@ const CoffeeResultScreen: React.FC = () => {
   };
 
   const handleSave = async () => {
-    setIsSaving(true);
-    const recordId = await saveRecord();
-    setIsSaving(false);
+    if (!user) {
+      toast.show({
+        title: "ログインが必要です",
+        description: "コーヒー記録を保存するには、ログインしてください",
+        status: "warning"
+      });
+      return;
+    }
     
-    if (recordId) {
-      resetForm();
-      navigation.navigate(ROUTES.MAIN);
+    setIsSaving(true);
+    
+    try {
+      // Firebase Storageに記録を保存
+      const data = {
+        coffeeInfo: {
+          name,
+          roaster,
+          photoURI: photoURL
+        },
+        responses: {
+          body,
+          flavor,
+          aftertaste
+        }
+      };
+      
+      const newRecordId = await createRecord(data);
+      
+      if (newRecordId) {
+        setRecordId(newRecordId);
+        
+        toast.show({
+          title: "保存完了",
+          description: "コーヒー記録が正常に保存されました",
+          status: "success"
+        });
+        
+        resetForm();
+        navigation.navigate(ROUTES.MAIN);
+      } else {
+        toast.show({
+          title: "エラー",
+          description: "記録の保存に失敗しました",
+          status: "error"
+        });
+      }
+    } catch (error) {
+      console.error("Save record error:", error);
+      toast.show({
+        title: "エラー",
+        description: "記録の保存中にエラーが発生しました",
+        status: "error"
+      });
+    } finally {
+      setIsSaving(false);
     }
   };
-
-  // サンプル推奨コーヒー（実際の実装ではAPIから取得）
-  const recommendedCoffees = [
-    'エチオピア シダモ',
-    'グアテマラ アンティグア',
-    'コロンビア ウイラ',
-  ];
 
   return (
     <Box flex={1} bg={COLORS.background.primary} safeArea>
@@ -66,10 +142,27 @@ const CoffeeResultScreen: React.FC = () => {
             <VStack space={4}>
               <HStack space={2}>
                 <Box bg={COLORS.primary[500]} w={2} h="full" rounded="full" />
-                <Text fontWeight="bold" fontSize="lg">
-                  {name}
-                  {roaster && ` (${roaster})`}
-                </Text>
+                <VStack flex={1}>
+                  <Text fontWeight="bold" fontSize="lg">
+                    {name}
+                  </Text>
+                  {roaster && (
+                    <Text fontSize="sm" color={COLORS.text.secondary}>
+                      {roaster}
+                    </Text>
+                  )}
+                </VStack>
+                
+                {photoURL && (
+                  <Box size={16} overflow="hidden" rounded="md">
+                    <Image 
+                      source={{ uri: photoURL }}
+                      alt="コーヒー画像"
+                      size="full"
+                      resizeMode="cover"
+                    />
+                  </Box>
+                )}
               </HStack>
 
               <Text fontSize="md" italic>
@@ -90,7 +183,7 @@ const CoffeeResultScreen: React.FC = () => {
           <VStack space={2}>
             <Heading size="sm">似た味わいの豆:</Heading>
             <Box>
-              {recommendedCoffees.map((coffee, index) => (
+              {similarCoffees.map((coffee, index) => (
                 <HStack key={index} space={2} alignItems="center" mb={2}>
                   <Icon 
                     as={Ionicons} 
@@ -107,17 +200,24 @@ const CoffeeResultScreen: React.FC = () => {
       </ScrollView>
 
       <Box px={6} py={4} bg={COLORS.background.primary}>
-        {isSaving ? (
+        {isSaving || firebaseLoading ? (
           <Center py={2}>
             <Spinner color={COLORS.primary[500]} size="lg" />
             <Text mt={2} color={COLORS.text.secondary}>保存しています...</Text>
           </Center>
         ) : (
-          <Button
-            label="保存して終了"
-            onPress={handleSave}
-            isDisabled={isSubmitting}
-          />
+          <VStack space={3}>
+            <Button
+              label="保存して終了"
+              onPress={handleSave}
+              isDisabled={isSubmitting || !user}
+            />
+            {!user && (
+              <Text color={COLORS.error} textAlign="center" fontSize="sm">
+                ログインすると記録を保存できます
+              </Text>
+            )}
+          </VStack>
         )}
       </Box>
     </Box>

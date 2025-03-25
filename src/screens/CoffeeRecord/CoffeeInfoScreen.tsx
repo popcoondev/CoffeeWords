@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Box, VStack, Heading, Icon, HStack, Pressable, Text, ScrollView } from 'native-base';
+import { Box, VStack, Heading, Icon, HStack, Pressable, Text, ScrollView, Image, useToast } from 'native-base';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { Ionicons } from '@expo/vector-icons';
@@ -11,12 +11,28 @@ import { RootStackParamList } from '../../types';
 import { ROUTES } from '../../constants/routes';
 import { COLORS } from '../../constants/theme';
 import { useCoffeeRecord } from '../../hooks/useCoffeeRecord';
+import { useCoffeeStorage } from '../../hooks/useCoffeeStorage';
 
 type CoffeeInfoNavigationProp = NativeStackNavigationProp<RootStackParamList, 'CoffeeRecordFlow'>;
 
 const CoffeeInfoScreen: React.FC = () => {
   const navigation = useNavigation<CoffeeInfoNavigationProp>();
-  const { name, roaster, photoURL, setName, setRoaster, uploadPhoto } = useCoffeeRecord();
+  const toast = useToast();
+  
+  // 従来のZustandのステート管理
+  const { 
+    name, 
+    roaster, 
+    photoURL, 
+    setName, 
+    setRoaster, 
+    setPhotoURL
+  } = useCoffeeRecord();
+  
+  // Firebase連携のためのフック
+  const { uploadImage, loading: uploading } = useCoffeeStorage();
+  
+  // ローカルステート
   const [imageUri, setImageUri] = useState<string | null>(photoURL);
   const [isUploading, setIsUploading] = useState(false);
 
@@ -34,7 +50,11 @@ const CoffeeInfoScreen: React.FC = () => {
       const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
       
       if (!permissionResult.granted) {
-        alert("画像へのアクセス許可が必要です");
+        toast.show({
+          title: "権限エラー",
+          description: "画像へのアクセス許可が必要です",
+          status: "error"
+        });
         return;
       }
       
@@ -48,14 +68,76 @@ const CoffeeInfoScreen: React.FC = () => {
       if (!result.canceled && result.assets[0].uri) {
         setImageUri(result.assets[0].uri);
         
-        // 実際の実装では画像をアップロードする
-        // setIsUploading(true);
-        // await uploadPhoto(result.assets[0].uri);
-        // setIsUploading(false);
+        // Firebase Storageに画像をアップロード
+        setIsUploading(true);
+        const uploadedUrl = await uploadImage(result.assets[0].uri);
+        setIsUploading(false);
+        
+        if (uploadedUrl) {
+          setPhotoURL(uploadedUrl);
+          toast.show({
+            title: "アップロード完了",
+            description: "画像が正常にアップロードされました",
+            status: "success"
+          });
+        }
       }
     } catch (error) {
       console.error("Error picking image:", error);
-      alert("画像の選択に失敗しました");
+      toast.show({
+        title: "エラー",
+        description: "画像の選択または処理に失敗しました",
+        status: "error"
+      });
+      setIsUploading(false);
+    }
+  };
+  
+  // カメラで撮影する機能
+  const handleCameraCapture = async () => {
+    try {
+      const permissionResult = await ImagePicker.requestCameraPermissionsAsync();
+      
+      if (!permissionResult.granted) {
+        toast.show({
+          title: "権限エラー",
+          description: "カメラへのアクセス許可が必要です",
+          status: "error"
+        });
+        return;
+      }
+      
+      const result = await ImagePicker.launchCameraAsync({
+        allowsEditing: true,
+        aspect: [1, 1],
+        quality: 0.7,
+      });
+      
+      if (!result.canceled && result.assets[0].uri) {
+        setImageUri(result.assets[0].uri);
+        
+        // Firebase Storageに画像をアップロード
+        setIsUploading(true);
+        const uploadedUrl = await uploadImage(result.assets[0].uri);
+        setIsUploading(false);
+        
+        if (uploadedUrl) {
+          setPhotoURL(uploadedUrl);
+          toast.show({
+            title: "アップロード完了",
+            description: "画像が正常にアップロードされました",
+            status: "success"
+          });
+        }
+      }
+    } catch (error) {
+      console.error("Error capturing image:", error);
+      toast.show({
+        title: "エラー",
+        description: "カメラの使用または画像処理に失敗しました",
+        status: "error"
+      });
+      setIsUploading(false);
     }
   };
 
@@ -88,49 +170,92 @@ const CoffeeInfoScreen: React.FC = () => {
 
           <VStack space={3}>
             <Text fontWeight="medium">写真（任意）</Text>
-            <Pressable 
-              onPress={handleImagePick}
-              borderWidth={1}
-              borderColor={COLORS.text.light}
-              borderStyle="dashed"
-              rounded="lg"
-              h={200}
-              justifyContent="center"
-              alignItems="center"
-              overflow="hidden"
-              bg={imageUri ? "transparent" : COLORS.background.secondary}
-              position="relative"
-            >
-              {imageUri ? (
-                <Box position="relative" w="full" h="full">
-                  <Box 
-                    position="absolute" 
-                    w="full" 
-                    h="full" 
-                    zIndex={1}
-                    bgColor="rgba(0,0,0,0.2)"
-                  />
-                  {/* 実際の実装ではキャッシュから取得した画像を表示 */}
-                  <Icon 
-                    as={Ionicons} 
-                    name="image" 
-                    size="5xl" 
-                    color="white" 
-                    position="absolute"
-                    top="50%"
-                    left="50%"
-                    marginTop="-20px"
-                    marginLeft="-20px"
-                    zIndex={2}
-                  />
-                </Box>
-              ) : (
-                <VStack space={2} alignItems="center">
-                  <Icon as={Ionicons} name="camera" size="3xl" color={COLORS.primary[500]} />
-                  <Text color={COLORS.text.secondary}>タップして写真を追加</Text>
+            
+            {isUploading ? (
+              <Box 
+                borderWidth={1}
+                borderColor={COLORS.text.light}
+                borderStyle="dashed"
+                rounded="lg"
+                h={200}
+                justifyContent="center"
+                alignItems="center"
+                bg={COLORS.background.secondary}
+              >
+                <VStack space={3} alignItems="center">
+                  <Icon as={Ionicons} name="cloud-upload" size="3xl" color={COLORS.primary[500]} />
+                  <Text color={COLORS.text.secondary}>アップロード中...</Text>
                 </VStack>
-              )}
-            </Pressable>
+              </Box>
+            ) : imageUri ? (
+              <Pressable 
+                onPress={handleImagePick}
+                borderWidth={1}
+                borderColor={COLORS.primary[500]}
+                borderStyle="solid"
+                rounded="lg"
+                h={200}
+                overflow="hidden"
+                position="relative"
+              >
+                <Image 
+                  source={{ uri: imageUri }}
+                  alt="コーヒー画像"
+                  w="full"
+                  h="full"
+                  resizeMode="cover"
+                />
+                <Box 
+                  position="absolute" 
+                  bottom={0}
+                  left={0}
+                  right={0}
+                  py={2}
+                  bg="rgba(0,0,0,0.5)"
+                  alignItems="center"
+                >
+                  <Text color="white" fontSize="sm">タップして画像を変更</Text>
+                </Box>
+              </Pressable>
+            ) : (
+              <HStack space={2} w="full">
+                <Pressable 
+                  onPress={handleImagePick}
+                  borderWidth={1}
+                  borderColor={COLORS.text.light}
+                  borderStyle="dashed"
+                  rounded="lg"
+                  flex={1}
+                  h={150}
+                  justifyContent="center"
+                  alignItems="center"
+                  bg={COLORS.background.secondary}
+                >
+                  <VStack space={2} alignItems="center">
+                    <Icon as={Ionicons} name="image" size="3xl" color={COLORS.primary[500]} />
+                    <Text color={COLORS.text.secondary} textAlign="center">ギャラリーから選択</Text>
+                  </VStack>
+                </Pressable>
+                
+                <Pressable 
+                  onPress={handleCameraCapture}
+                  borderWidth={1}
+                  borderColor={COLORS.text.light}
+                  borderStyle="dashed"
+                  rounded="lg"
+                  flex={1}
+                  h={150}
+                  justifyContent="center"
+                  alignItems="center"
+                  bg={COLORS.background.secondary}
+                >
+                  <VStack space={2} alignItems="center">
+                    <Icon as={Ionicons} name="camera" size="3xl" color={COLORS.primary[500]} />
+                    <Text color={COLORS.text.secondary} textAlign="center">カメラで撮影</Text>
+                  </VStack>
+                </Pressable>
+              </HStack>
+            )}
           </VStack>
         </VStack>
       </ScrollView>
