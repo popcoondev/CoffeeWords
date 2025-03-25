@@ -76,7 +76,7 @@ export const removeApiKey = async (): Promise<void> => {
 /**
  * コーヒーの言語化プロンプトを構築
  */
-const buildCoffeePrompt = (responses: CoffeeResponse): string => {
+export const buildCoffeePrompt = (responses: CoffeeResponse): string => {
   // ボディの表現マッピング
   const bodyDescriptions = {
     light: '軽い、繊細な口当たり',
@@ -136,66 +136,104 @@ const buildCoffeePrompt = (responses: CoffeeResponse): string => {
 /**
  * OpenAI APIを使用してコーヒーを言語化
  */
+/**
+ * OpenAI APIを使用してコーヒーを言語化（エラーハンドリングとフォールバック機能を強化）
+ */
 export const generateCoffeeLanguage = async (
-  responses: CoffeeResponse
+  responses: CoffeeResponse,
+  options?: { useFallback?: boolean }
 ): Promise<LanguageResult> => {
-  const apiKey = await getApiKey();
-  
-  if (!apiKey) {
-    throw new Error('OpenAI APIキーが設定されていません');
-  }
-  
-  const prompt = buildCoffeePrompt(responses);
+  const { useFallback = true } = options || {};
   
   try {
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${apiKey}`
-      },
-      body: JSON.stringify({
-        model: "gpt-4o",  // 最新のモデルを使用（適宜変更可能）
-        messages: [
-          {
-            role: "system",
-            content: "あなたはコーヒーの味覚を専門的に表現できるバリスタです。"
-          },
-          {
-            role: "user",
-            content: prompt
-          }
-        ],
-        temperature: 0.7,
-        response_format: { type: "json_object" }
-      })
-    });
+    const apiKey = await getApiKey();
     
-    if (!response.ok) {
-      const errorData = await response.json();
-      console.error('OpenAI API error:', errorData);
-      throw new Error(`OpenAI API エラー: ${response.status}`);
+    if (!apiKey) {
+      throw new Error('OpenAI APIキーが設定されていません');
     }
     
-    const data = await response.json();
+    const prompt = buildCoffeePrompt(responses);
     
-    // OpenAI APIからのレスポンスをパース
     try {
-      const resultText = data.choices[0].message.content;
-      const parsedResult = JSON.parse(resultText);
+      // リクエストタイムアウトの設定（8秒）
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 8000);
       
-      return {
-        shortDescription: parsedResult.shortDescription || '説明を生成できませんでした',
-        detailedDescription: parsedResult.detailedDescription || '',
-        tags: parsedResult.tags || [],
-        recommendations: parsedResult.recommendations || []
-      };
-    } catch (parseError) {
-      console.error('Failed to parse OpenAI response:', parseError);
-      throw new Error('APIレスポンスの解析に失敗しました');
+      const response = await fetch('https://api.openai.com/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${apiKey}`
+        },
+        body: JSON.stringify({
+          model: "gpt-4o",  // 最新のモデルを使用（適宜変更可能）
+          messages: [
+            {
+              role: "system",
+              content: "あなたはコーヒーの味覚を専門的に表現できるバリスタです。"
+            },
+            {
+              role: "user",
+              content: prompt
+            }
+          ],
+          temperature: 0.7,
+          response_format: { type: "json_object" }
+        }),
+        signal: controller.signal
+      });
+      
+      clearTimeout(timeoutId);
+      
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        console.error('OpenAI API error:', errorData);
+        throw new Error(`OpenAI API エラー: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      
+      // OpenAI APIからのレスポンスをパース
+      try {
+        const resultText = data.choices[0].message.content;
+        const parsedResult = JSON.parse(resultText);
+        
+        return {
+          shortDescription: parsedResult.shortDescription || '説明を生成できませんでした',
+          detailedDescription: parsedResult.detailedDescription || '',
+          tags: parsedResult.tags || [],
+          recommendations: parsedResult.recommendations || []
+        };
+      } catch (parseError) {
+        console.error('Failed to parse OpenAI response:', parseError);
+        throw new Error('APIレスポンスの解析に失敗しました');
+      }
+    } catch (error: any) {
+      console.error('Error calling OpenAI API:', error);
+      
+      // フォールバックが有効で、エラーの種類が適切な場合はモックデータを使用
+      if (useFallback && (
+        error instanceof Error && (
+          error.message.includes('API エラー') ||
+          error.message.includes('abort') ||
+          error.message.includes('timeout') ||
+          error.message.includes('network') ||
+          error.name === 'AbortError' ||
+          error.message.includes('解析に失敗')
+        )
+      )) {
+        console.log('Falling back to mock data due to API error');
+        return mockGenerateCoffeeLanguage(responses);
+      }
+      
+      throw error;
     }
-  } catch (error) {
-    console.error('Error calling OpenAI API:', error);
+  } catch (error: any) {
+    // APIキーエラーと予期せぬエラーの場合も、フォールバックが有効ならモックデータを使用
+    if (useFallback) {
+      console.log('Falling back to mock data due to general error:', error.message);
+      return mockGenerateCoffeeLanguage(responses);
+    }
     throw error;
   }
 };
