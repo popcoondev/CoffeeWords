@@ -22,4 +22,5 @@ export const ROUTES = {
   // 設定やプロフィール
   PROFILE: 'Profile',
   SETTINGS: 'Settings',
+  API_KEY_SETTINGS: 'ApiKeySettings',
 };

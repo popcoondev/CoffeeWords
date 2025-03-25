@@ -12,6 +12,7 @@ import CoffeeRecordNavigator from './CoffeeRecordNavigator';
 // スクリーン
 import OnboardingScreen from '../screens/Onboarding/OnboardingScreen';
 import ExperienceLevelScreen from '../screens/Onboarding/ExperienceLevelScreen';
+import ApiKeySettingScreen from '../screens/Preference/ApiKeySettingScreen';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
@@ -36,6 +37,9 @@ const AppNavigator = () => {
         
         {/* コーヒー記録フロー */}
         <Stack.Screen name={ROUTES.COFFEE_RECORD_FLOW} component={CoffeeRecordNavigator} />
+        
+        {/* 設定画面 */}
+        <Stack.Screen name={ROUTES.API_KEY_SETTINGS} component={ApiKeySettingScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );

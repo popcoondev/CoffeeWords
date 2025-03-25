@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Box, VStack, Heading, Icon, HStack, Pressable, Text, ScrollView, Center, Spinner, useToast } from 'native-base';
+import React, { useState, useEffect } from 'react';
+import { Box, VStack, Heading, Icon, HStack, Pressable, Text, ScrollView, Center, Spinner, useToast, Modal, FormControl, Input } from 'native-base';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { Ionicons } from '@expo/vector-icons';
@@ -12,6 +12,7 @@ import { ROUTES } from '../../constants/routes';
 import { COLORS } from '../../constants/theme';
 import { useCoffeeRecord } from '../../hooks/useCoffeeRecord';
 import { useCoffeeStorage } from '../../hooks/useCoffeeStorage';
+import { useLanguageGeneration } from '../../hooks/useLanguageGeneration';
 
 type CoffeeTasteNavigationProp = NativeStackNavigationProp<RootStackParamList, 'CoffeeRecordFlow'>;
 
@@ -56,12 +57,30 @@ const CoffeeTasteScreen: React.FC = () => {
     isSubmitting,
   } = useCoffeeRecord();
   
-  // Firebase連携のためのフック
-  const { generateLanguage, loading: firebaseLoading, error: firebaseError } = useCoffeeStorage();
+  // Firebase連携のためのフック (バックアップとして保持)
+  const { loading: firebaseLoading, error: firebaseError } = useCoffeeStorage();
+  
+  // OpenAI APIを使った言語化生成フック
+  const { 
+    loading, 
+    error, 
+    result,
+    hasKey,
+    generateLanguage, 
+    checkApiKey,
+    setupApiKey
+  } = useLanguageGeneration();
   
   // ローカルステート
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [showApiKeyModal, setShowApiKeyModal] = useState(false);
+  const [apiKey, setApiKey] = useState('');
+  
+  // APIキーチェック
+  useEffect(() => {
+    checkApiKey();
+  }, [checkApiKey]);
 
   const handleBack = () => {
     if (currentQuestion > 0) {
@@ -88,24 +107,53 @@ const CoffeeTasteScreen: React.FC = () => {
     }
   };
 
+  // APIキー設定モーダルのハンドラ
+  const handleSaveApiKey = async () => {
+    if (!apiKey || apiKey.length < 10) {
+      toast.show({
+        title: "エラー",
+        description: "有効なAPIキーを入力してください",
+        status: "error"
+      });
+      return;
+    }
+    
+    const success = await setupApiKey(apiKey);
+    if (success) {
+      setShowApiKeyModal(false);
+      setApiKey('');
+      toast.show({
+        title: "設定完了",
+        description: "APIキーを設定しました",
+        status: "success"
+      });
+    }
+  };
+
   // 言語化生成
   const handleGenerateLanguage = async () => {
+    // APIキーがない場合は設定モーダルを表示
+    if (hasKey === false) {
+      setShowApiKeyModal(true);
+      return;
+    }
+    
     setIsGenerating(true);
     
     try {
-      // Firebase AIサービスを使用して言語化を生成
+      // OpenAI APIを使用して言語化を生成
       const responses = {
         body,
         flavor,
         aftertaste
       };
       
-      const result = await generateLanguage(responses);
+      const languageResult = await generateLanguage(responses);
       
-      if (result) {
+      if (languageResult) {
         // 結果をZustandストアに保存
-        setLanguageResult(result.text);
-        setTags(result.tags || []);
+        setLanguageResult(languageResult.shortDescription);
+        setTags(languageResult.tags || []);
         
         // 結果画面に遷移
         navigation.navigate(ROUTES.COFFEE_RECORD_RESULT);
@@ -126,7 +174,7 @@ const CoffeeTasteScreen: React.FC = () => {
       console.error("Language generation error:", error);
       toast.show({
         title: "エラー",
-        description: firebaseError || "言語化の生成に失敗しました",
+        description: error instanceof Error ? error.message : "言語化の生成に失敗しました",
         status: "error"
       });
     } finally {
@@ -236,7 +284,7 @@ const CoffeeTasteScreen: React.FC = () => {
       </ScrollView>
 
       <Box px={6} py={4} bg={COLORS.background.primary}>
-        {isGenerating ? (
+        {isGenerating || loading ? (
           <Center py={2}>
             <Spinner color={COLORS.primary[500]} size="lg" />
             <Text mt={2} color={COLORS.text.secondary}>言語化しています...</Text>
@@ -250,6 +298,47 @@ const CoffeeTasteScreen: React.FC = () => {
           />
         )}
       </Box>
+      
+      {/* OpenAI APIキー設定モーダル */}
+      <Modal isOpen={showApiKeyModal} onClose={() => setShowApiKeyModal(false)}>
+        <Modal.Content>
+          <Modal.CloseButton />
+          <Modal.Header>OpenAI APIキーの設定</Modal.Header>
+          <Modal.Body>
+            <VStack space={4}>
+              <Text>
+                コーヒー言語化機能を使用するには、OpenAI APIキーが必要です。
+                APIキーをお持ちでない場合は、OpenAIのウェブサイトで取得してください。
+              </Text>
+              <FormControl isRequired>
+                <FormControl.Label>APIキー</FormControl.Label>
+                <Input
+                  value={apiKey}
+                  onChangeText={setApiKey}
+                  placeholder="sk-..."
+                  secureTextEntry
+                  autoCapitalize="none"
+                />
+                <FormControl.HelperText>
+                  APIキーは端末内に安全に保存され、OpenAI以外には送信されません。
+                </FormControl.HelperText>
+              </FormControl>
+            </VStack>
+          </Modal.Body>
+          <Modal.Footer>
+            <Button
+              label="キャンセル"
+              variant="outline"
+              onPress={() => setShowApiKeyModal(false)}
+              mr={2}
+            />
+            <Button
+              label="保存"
+              onPress={handleSaveApiKey}
+            />
+          </Modal.Footer>
+        </Modal.Content>
+      </Modal>
     </Box>
   );
 };

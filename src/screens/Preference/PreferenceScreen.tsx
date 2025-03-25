@@ -1,5 +1,5 @@
-import React from 'react';
-import { Box, VStack, Heading, Text, HStack, Pressable, Icon, ScrollView } from 'native-base';
+import React, { useEffect, useState } from 'react';
+import { Box, VStack, Heading, Text, HStack, Pressable, Icon, ScrollView, Divider } from 'native-base';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { Ionicons } from '@expo/vector-icons';
@@ -11,6 +11,7 @@ import { Button } from '../../components/ui/Button';
 import { RootStackParamList } from '../../types';
 import { ROUTES } from '../../constants/routes';
 import { COLORS } from '../../constants/theme';
+import { useLanguageGeneration } from '../../hooks/useLanguageGeneration';
 
 type PreferenceNavigationProp = NativeStackNavigationProp<RootStackParamList, 'Main'>;
 
@@ -45,9 +46,27 @@ const PreferenceScreen: React.FC = () => {
   const chartSize = windowWidth - 80; // パディングを考慮
   const chartCenter = chartSize / 2;
   const chartRadius = chartSize * 0.4;
+  
+  // OpenAI API設定の状態確認
+  const { hasKey, checkApiKey } = useLanguageGeneration();
+  const [apiKeyStatus, setApiKeyStatus] = useState<boolean | null>(null);
+  
+  useEffect(() => {
+    const checkStatus = async () => {
+      const status = await checkApiKey();
+      setApiKeyStatus(status);
+    };
+    
+    checkStatus();
+  }, [checkApiKey]);
 
   const handleSharePress = () => {
     // 実装予定: 共有機能
+  };
+  
+  const handleOpenApiSettings = () => {
+    // APIキー設定画面に遷移
+    navigation.navigate(ROUTES.API_KEY_SETTINGS);
   };
 
   // レーダーチャートのポリゴン座標を計算
@@ -192,6 +211,43 @@ const PreferenceScreen: React.FC = () => {
                 size="sm"
                 mt={2}
               />
+            </VStack>
+          </Card>
+        </VStack>
+        
+        <Divider my={2} />
+        
+        {/* アプリ設定 */}
+        <VStack space={2}>
+          <Heading size="md">アプリ設定</Heading>
+          <Card>
+            <VStack space={3}>
+              <Pressable onPress={handleOpenApiSettings}>
+                <HStack alignItems="center" justifyContent="space-between" py={2}>
+                  <HStack space={3} alignItems="center">
+                    <Icon
+                      as={Ionicons}
+                      name="key"
+                      size="sm"
+                      color={COLORS.primary[500]}
+                    />
+                    <VStack>
+                      <Text fontWeight="medium">OpenAI API設定</Text>
+                      <Text fontSize="xs" color={COLORS.text.secondary}>
+                        {apiKeyStatus 
+                          ? "設定済み" 
+                          : "未設定 - コーヒー言語化に必要です"}
+                      </Text>
+                    </VStack>
+                  </HStack>
+                  <Icon
+                    as={Ionicons}
+                    name="chevron-forward"
+                    size="sm"
+                    color={COLORS.text.light}
+                  />
+                </HStack>
+              </Pressable>
             </VStack>
           </Card>
         </VStack>

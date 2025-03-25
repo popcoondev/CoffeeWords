@@ -65,6 +65,7 @@ export type RootStackParamList = {
   DictionaryDetail: { termId: string };
   Profile: undefined;
   Settings: undefined;
+  ApiKeySettings: undefined;
 };
 
 // API関連の型定義
