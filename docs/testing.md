@@ -113,12 +113,54 @@ OpenAI API統合とそのフォールバック機能をテストする一連の�
 3. 必要なモジュールをインポートし、テストケースを実装
 4. `npm test`コマンドでテストを実行
 
+## 実際のOpenAI API統合テスト
+
+モックを使用したテストに加えて、実際のOpenAI APIを使用した統合テストも実装されています。これらのテストは、実際の環境でAPIが正常に動作することを確認するためのものです。
+
+### 実際のAPIテストのセットアップ
+
+1. `.env.test.example`ファイルを`.env.test`としてコピーし、実際のAPIキーを設定します：
+```bash
+cp .env.test.example .env.test
+```
+
+2. `.env.test`ファイルを編集し、APIキーとテスト有効化設定を更新します：
+```
+# テスト環境用の環境変数
+# 実際のAPIキーを設定してください（テスト実行時にのみ使用されます）
+OPENAI_API_KEY=sk-your-actual-api-key
+# APIテストを有効にするかどうか
+ENABLE_API_TESTS=true
+```
+
+3. 実際のAPIテストを実行するには、以下のコマンドを使用します：
+```bash
+npm run test:live
+```
+
+あるいは、環境変数を直接指定してテストを実行することもできます：
+```bash
+OPENAI_API_KEY=sk-your-actual-api-key ENABLE_API_TESTS=true npx jest openai.integration.live.test.ts
+```
+
+**注意**: 
+- このテストを実行すると、OpenAI APIクレジットが消費されます。コストを抑えるために、必要な場合にのみ実行してください。
+- APIキーはリポジトリに公開されないよう注意してください。`.env.test`ファイルは`.gitignore`に追加されています。
+
+### 実装されたAPIテストケース
+
+- `light` bodyのコーヒーを実際のAPIで言語化できるかどうか
+- `heavy` bodyのコーヒーを実際のAPIで言語化できるかどうか
+- 無効なオプションを含む場合でもAPIが正常に動作するかどうか
+
+これらのテストでは、APIから返される結果が期待通りの形式と内容であることを検証し、実際のAPIが期待通りに機能していることを確認します。
+
 ## テストカバレッジ
 
 テストカバレッジレポートを生成するには、以下のコマンドを実行します：
 
 ```bash
-npx jest --coverage
+npm run test:coverage
 ```
 
 これにより、`coverage`ディレクトリにHTMLレポートが生成されます。
