@@ -12,8 +12,8 @@
     "test:live": "cross-env ENABLE_API_TESTS=true jest openai.integration.live.test.ts",
     "test:mock": "cross-env OPENAI_API_KEY= ENABLE_API_TESTS=false jest --testPathIgnorePatterns=openai.integration.live.test.ts --testPathPattern=services/openai",
     "test:coverage": "jest --coverage",
-    "test:flows": "cross-env TS_NODE_TRANSPILE_ONLY=1 TEST_ENV=jsdom USE_MOCK_DATA=true jest --no-cache --testPathPattern=flows --passWithNoTests",
-    "test:ui": "cross-env TS_NODE_TRANSPILE_ONLY=1 TEST_ENV=jsdom USE_MOCK_DATA=true jest --no-cache --testPathPattern=screens --passWithNoTests"
+    "test:flows": "cross-env NODE_ENV=test TS_NODE_TRANSPILE_ONLY=1 TEST_ENV=jsdom USE_MOCK_DATA=true jest --no-cache --testPathPattern=flows --passWithNoTests",
+    "test:ui": "cross-env NODE_ENV=test TS_NODE_TRANSPILE_ONLY=1 TEST_ENV=jsdom USE_MOCK_DATA=true jest --no-cache --testPathPattern=screens --passWithNoTests"
   },
   "dependencies": {
     "@expo/vector-icons": "^14.0.4",
@@ -39,6 +39,10 @@
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",
+    "@babel/plugin-transform-modules-commonjs": "^7.26.3",
+    "@babel/preset-env": "^7.26.9",
+    "@babel/preset-react": "^7.26.3",
+    "@babel/preset-typescript": "^7.27.0",
     "@testing-library/jest-dom": "^6.6.3",
     "@testing-library/react-native": "^12.0.0",
     "@types/jest": "^29.5.12",
