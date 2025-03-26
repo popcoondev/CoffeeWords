@@ -53,10 +53,18 @@ const CoffeeResultScreen: React.FC = () => {
   const [detailedDescription, setDetailedDescription] = useState<string>('');
   const [recommendedCoffees, setRecommendedCoffees] = useState<string[]>([]);
   
+  // ローカルステート追加
+  const [educationalContent, setEducationalContent] = useState<string>('');
+  const [nextStepsSuggestion, setNextStepsSuggestion] = useState<string>('');
+  const [coffeeTrivia, setCoffeeTrivia] = useState<string>('');
+
   // 言語化結果を取得・設定
   useEffect(() => {
     if (languageGenerationResult) {
       setDetailedDescription(languageGenerationResult.detailedDescription || '');
+      setEducationalContent(languageGenerationResult.educationalContent || '');
+      setNextStepsSuggestion(languageGenerationResult.nextStepsSuggestion || '');
+      setCoffeeTrivia(languageGenerationResult.coffeeTrivia || '');
       setRecommendedCoffees(languageGenerationResult.recommendations || [
         'エチオピア シダモ',
         'グアテマラ アンティグア',
@@ -65,6 +73,9 @@ const CoffeeResultScreen: React.FC = () => {
     } else {
       // 言語化結果がない場合のデフォルト設定
       setDetailedDescription('適度な酸味と甘みのバランスが良く、滑らかな口当たりが特徴です。心地よい余韻が続き、次の一口を誘います。');
+      setEducationalContent('このバランスの良さは標高1200〜1500mの中高地で育まれたコーヒーの特徴的な味わいです。中煎りによって酸味と甘みのバランスが絶妙に引き出されています。');
+      setNextStepsSuggestion('次回は温度を少し下げて（92℃程度）淹れてみると、より繊細な風味が楽しめるでしょう。また、抽出時間を30秒延ばすと、ボディ感がより増します。');
+      setCoffeeTrivia('コーヒーは世界で最も取引量の多い農産物の一つで、その味わいの化学的成分は水よりも多いと言われています。');
       setRecommendedCoffees([
         'エチオピア シダモ',
         'グアテマラ アンティグア',
@@ -209,6 +220,45 @@ const CoffeeResultScreen: React.FC = () => {
                     <Divider />
                     <Text fontSize="sm">
                       {detailedDescription}
+                    </Text>
+                  </>
+                )}
+                
+                {educationalContent && (
+                  <>
+                    <Divider />
+                    <HStack alignItems="center" space={2}>
+                      <Icon as={Ionicons} name="school" size="sm" color={COLORS.primary[500]} />
+                      <Text fontWeight="bold" fontSize="sm">学びのポイント:</Text>
+                    </HStack>
+                    <Text fontSize="sm">
+                      {educationalContent}
+                    </Text>
+                  </>
+                )}
+                
+                {nextStepsSuggestion && (
+                  <>
+                    <Divider />
+                    <HStack alignItems="center" space={2}>
+                      <Icon as={Ionicons} name="arrow-forward" size="sm" color={COLORS.primary[500]} />
+                      <Text fontWeight="bold" fontSize="sm">次のステップ:</Text>
+                    </HStack>
+                    <Text fontSize="sm">
+                      {nextStepsSuggestion}
+                    </Text>
+                  </>
+                )}
+                
+                {coffeeTrivia && (
+                  <>
+                    <Divider />
+                    <HStack alignItems="center" space={2}>
+                      <Icon as={Ionicons} name="information-circle" size="sm" color={COLORS.primary[500]} />
+                      <Text fontWeight="bold" fontSize="sm">コーヒー豆知識:</Text>
+                    </HStack>
+                    <Text fontSize="sm" fontStyle="italic">
+                      {coffeeTrivia}
                     </Text>
                   </>
                 )}
