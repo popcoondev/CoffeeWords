@@ -12,6 +12,7 @@ import { RootStackParamList } from '../../types';
 import { ROUTES } from '../../constants/routes';
 import { COLORS } from '../../constants/theme';
 import { useLanguageGeneration } from '../../hooks/useLanguageGeneration';
+import { useAuth } from '../../hooks/useAuth';
 
 type PreferenceNavigationProp = NativeStackNavigationProp<RootStackParamList, 'Main'>;
 
@@ -51,6 +52,9 @@ const PreferenceScreen: React.FC = () => {
   const { hasKey, checkApiKey } = useLanguageGeneration();
   const [apiKeyStatus, setApiKeyStatus] = useState<boolean | null>(null);
   
+  // 認証状態の取得
+  const { user, loading, logout } = useAuth();
+  
   useEffect(() => {
     const checkStatus = async () => {
       const status = await checkApiKey();
@@ -59,6 +63,20 @@ const PreferenceScreen: React.FC = () => {
     
     checkStatus();
   }, [checkApiKey]);
+  
+  // ログアウト処理
+  const handleLogout = async () => {
+    await logout();
+    navigation.reset({
+      index: 0,
+      routes: [{ name: ROUTES.LOGIN }],
+    });
+  };
+  
+  // ログイン画面に移動
+  const handleLogin = () => {
+    navigation.navigate(ROUTES.LOGIN);
+  };
 
   const handleSharePress = () => {
     // 実装予定: 共有機能
@@ -216,6 +234,65 @@ const PreferenceScreen: React.FC = () => {
         </VStack>
         
         <Divider my={2} />
+        
+        {/* アカウント設定 */}
+        <VStack space={2}>
+          <Heading size="md">アカウント</Heading>
+          <Card>
+            <VStack space={3}>
+              {user ? (
+                // ログイン済みの場合
+                <>
+                  <HStack alignItems="center" space={3} py={2}>
+                    <Icon
+                      as={Ionicons}
+                      name="person-circle"
+                      size="lg"
+                      color={COLORS.primary[500]}
+                    />
+                    <VStack>
+                      <Text fontWeight="bold">{user.displayName || 'ユーザー'}</Text>
+                      <Text fontSize="xs" color={COLORS.text.secondary}>{user.email}</Text>
+                    </VStack>
+                  </HStack>
+                  <Divider my={1} />
+                  <Pressable onPress={handleLogout}>
+                    <HStack alignItems="center" space={3} py={2}>
+                      <Icon
+                        as={Ionicons}
+                        name="log-out-outline"
+                        size="sm"
+                        color={COLORS.error}
+                      />
+                      <Text color={COLORS.error}>ログアウト</Text>
+                    </HStack>
+                  </Pressable>
+                </>
+              ) : (
+                // 未ログインの場合
+                <Pressable onPress={handleLogin}>
+                  <HStack alignItems="center" justifyContent="space-between" py={2}>
+                    <HStack space={3} alignItems="center">
+                      <Icon
+                        as={Ionicons}
+                        name="log-in-outline"
+                        size="sm"
+                        color={COLORS.primary[500]}
+                      />
+                      <Text fontWeight="medium">ログイン / 新規登録</Text>
+                    </HStack>
+                    <Icon
+                      as={Ionicons}
+                      name="chevron-forward"
+                      size="sm"
+                      color={COLORS.text.light}
+                    />
+                  </HStack>
+                </Pressable>
+              )}
+            </VStack>
+          </Card>
+        </VStack>
         
         {/* アプリ設定 */}
         <VStack space={2}>

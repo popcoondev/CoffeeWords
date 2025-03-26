@@ -89,7 +89,7 @@ const MainTabNavigator = () => {
           );
         })}
 
-        {/* 中央のFABボタン */}
+        {/* 中央のFABボタン - 今日の一杯記録 */}
         <Box
           position="absolute"
           top="-20px"
@@ -107,8 +107,13 @@ const MainTabNavigator = () => {
             shadow={3}
             onPress={handleAddCoffeeRecord}
             _pressed={{ bg: COLORS.primary[600] }}
+            accessibilityLabel="今日の一杯を記録する"
+            accessibilityHint="タップしてコーヒーの記録を開始"
           >
-            <Icon as={Ionicons} name="add" size="xl" color="white" />
+            <VStack alignItems="center" space={0}>
+              <Icon as={Ionicons} name="cafe" size="md" color="white" />
+              <Text fontSize="9px" color="white" fontWeight="bold">記録</Text>
+            </VStack>
           </Pressable>
         </Box>
       </Box>

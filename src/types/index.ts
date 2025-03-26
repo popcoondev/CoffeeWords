@@ -56,6 +56,8 @@ export interface DictionaryEntry {
 // ナビゲーション型定義
 export type RootStackParamList = {
   Onboarding: undefined;
+  Login: undefined;
+  Signup: undefined;
   ExperienceLevel: undefined;
   Main: undefined;
   CoffeeRecordFlow: undefined;

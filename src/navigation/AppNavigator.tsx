@@ -16,6 +16,8 @@ import CoffeeRecordNavigator from './CoffeeRecordNavigator';
 // スクリーン
 import OnboardingScreen from '../screens/Onboarding/OnboardingScreen';
 import ExperienceLevelScreen from '../screens/Onboarding/ExperienceLevelScreen';
+import LoginScreen from '../screens/Onboarding/LoginScreen';
+import SignupScreen from '../screens/Onboarding/SignupScreen';
 import ApiKeySettingScreen from '../screens/Preference/ApiKeySettingScreen';
 
 // コンポーネント
@@ -117,13 +119,29 @@ const AppNavigator = () => {
             animation: 'slide_from_right',
           }}
         >
-          {/* オンボーディング */}
+          {/* オンボーディングと認証 */}
           <Stack.Screen 
             name={ROUTES.ONBOARDING} 
             component={OnboardingScreen} 
             options={{ gestureEnabled: false }}
             listeners={{
               focus: () => console.log('OnboardingScreen FOCUSED')
+            }}
+          />
+          <Stack.Screen 
+            name={ROUTES.LOGIN} 
+            component={LoginScreen} 
+            options={{ gestureEnabled: true }}
+            listeners={{
+              focus: () => console.log('LoginScreen FOCUSED')
+            }}
+          />
+          <Stack.Screen 
+            name={ROUTES.SIGNUP} 
+            component={SignupScreen} 
+            options={{ gestureEnabled: true }}
+            listeners={{
+              focus: () => console.log('SignupScreen FOCUSED')
             }}
           />
           <Stack.Screen 

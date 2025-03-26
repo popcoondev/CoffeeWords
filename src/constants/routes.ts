@@ -3,6 +3,8 @@ export const ROUTES = {
   // 認証関連
   ONBOARDING: 'Onboarding',
   EXPERIENCE_LEVEL: 'ExperienceLevel',
+  LOGIN: 'Login',
+  SIGNUP: 'Signup',
   
   // メインタブ
   MAIN: 'Main',
