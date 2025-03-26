@@ -62,17 +62,40 @@ jest.mock('@react-navigation/native', () => {
 });
 
 // Native Baseのモック
-jest.mock('native-base', () => {
-  const actualNB = jest.requireActual('native-base');
-  return {
-    ...actualNB,
-    useToast: jest.fn().mockReturnValue({
-      show: jest.fn(),
-      close: jest.fn(),
-      closeAll: jest.fn(),
-    }),
-  };
-});
+jest.mock('native-base', () => ({
+  useToast: jest.fn().mockReturnValue({
+    show: jest.fn(),
+    close: jest.fn(),
+    closeAll: jest.fn(),
+  }),
+  Box: 'Box',
+  Button: 'Button',
+  Center: 'Center',
+  HStack: 'HStack',
+  VStack: 'VStack',
+  Text: 'Text',
+  Input: 'Input',
+  Image: 'Image',
+  ScrollView: 'ScrollView',
+  Heading: 'Heading',
+  Pressable: 'Pressable',
+  Spinner: 'Spinner',
+  Icon: 'Icon',
+  Modal: {
+    Header: 'Modal.Header',
+    Body: 'Modal.Body',
+    Footer: 'Modal.Footer',
+    Content: 'Modal.Content',
+    CloseButton: 'Modal.CloseButton',
+  },
+  FormControl: {
+    Label: 'FormControl.Label',
+    ErrorMessage: 'FormControl.ErrorMessage',
+    HelperText: 'FormControl.HelperText',
+  },
+  Divider: 'Divider',
+  Card: 'Card',
+}));
 
 // @testingを修正
 Object.defineProperty(global, 'TextEncoder', {

@@ -50,7 +50,7 @@ describe('MainTabNavigator', () => {
     // FABボタンが存在することを確認
     const fabButton = tabButtons.find(button => 
       button.props.children.some((child: any) => 
-        child?.props?.name === 'add'
+        child?.props?.name === 'cafe'
       )
     );
     expect(fabButton).toBeTruthy();
@@ -71,7 +71,7 @@ describe('MainTabNavigator', () => {
     // FABボタンを見つける
     const fabButton = tabButtons.find(button => 
       button.props.children.some((child: any) => 
-        child?.props?.name === 'add'
+        child?.props?.name === 'cafe'
       )
     );
     
