@@ -71,15 +71,31 @@ const SignupScreen: React.FC = () => {
       return;
     }
 
-    // サインアップ処理
-    const success = await register(email.trim(), password, name.trim());
-    if (success) {
-      // サインアップ成功、体験レベル選択へ
-      navigation.navigate(ROUTES.EXPERIENCE_LEVEL);
-    } else if (error) {
+    try {
+      // 開発環境ではメール/パスワード認証をバイパスする
+      if (__DEV__) {
+        console.log('開発環境: 認証バイパス');
+        navigation.navigate(ROUTES.EXPERIENCE_LEVEL);
+        return;
+      }
+      
+      // サインアップ処理
+      const success = await register(email.trim(), password, name.trim());
+      if (success) {
+        // サインアップ成功、体験レベル選択へ
+        navigation.navigate(ROUTES.EXPERIENCE_LEVEL);
+      } else if (error) {
+        toast.show({
+          title: '登録エラー',
+          description: error,
+          status: 'error',
+        });
+      }
+    } catch (err) {
+      console.error('サインアップ処理エラー:', err);
       toast.show({
         title: '登録エラー',
-        description: error,
+        description: 'サインアップ処理中にエラーが発生しました。開発環境では、Firebaseが正しく設定されていない可能性があります。',
         status: 'error',
       });
     }
