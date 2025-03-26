@@ -11,13 +11,39 @@ import { COLORS } from '../constants/theme';
 
 // ナビゲーター
 import MainTabNavigator from './MainTabNavigator';
-import CoffeeRecordNavigator from './CoffeeRecordNavigator';
 
 // スクリーン
+// 認証関連
 import OnboardingScreen from '../screens/Onboarding/OnboardingScreen';
 import ExperienceLevelScreen from '../screens/Onboarding/ExperienceLevelScreen';
 import LoginScreen from '../screens/Onboarding/LoginScreen';
 import SignupScreen from '../screens/Onboarding/SignupScreen';
+
+// 探検フロー
+import ExplorationInfoScreen from '../screens/Exploration/ExplorationInfoScreen';
+import ExplorationTasteMapScreen from '../screens/Exploration/ExplorationTasteMapScreen';
+import ExplorationPreferencesScreen from '../screens/Exploration/ExplorationPreferencesScreen';
+import ExplorationComparisonScreen from '../screens/Exploration/ExplorationComparisonScreen';
+import ExplorationResultScreen from '../screens/Exploration/ExplorationResultScreen';
+
+// 翻訳辞書
+import TranslationDictionaryScreen from '../screens/Translation/TranslationDictionaryScreen';
+// import TermDetailScreen from '../screens/Translation/TermDetailScreen';
+// import TermEditScreen from '../screens/Translation/TermEditScreen';
+// import TranslationToolScreen from '../screens/Translation/TranslationToolScreen';
+
+// 味わい探検マップ
+import TasteMapScreen from '../screens/TasteMap/TasteMapScreen';
+// import TasteMapDetailScreen from '../screens/TasteMap/TasteMapDetailScreen';
+// import PreferenceProfileScreen from '../screens/TasteMap/PreferenceProfileScreen';
+// import RecommendationsScreen from '../screens/TasteMap/RecommendationsScreen';
+// import ExplorationHistoryScreen from '../screens/TasteMap/ExplorationHistoryScreen';
+
+// ミッション
+// import MissionsScreen from '../screens/Missions/MissionsScreen';
+// import MissionDetailScreen from '../screens/Missions/MissionDetailScreen';
+
+// 設定
 import ApiKeySettingScreen from '../screens/Preference/ApiKeySettingScreen';
 
 // コンポーネント
@@ -119,37 +145,29 @@ const AppNavigator = () => {
             animation: 'slide_from_right',
           }}
         >
-          {/* オンボーディングと認証 */}
+          {/* 認証関連 */}
           <Stack.Screen 
             name={ROUTES.ONBOARDING} 
             component={OnboardingScreen} 
             options={{ gestureEnabled: false }}
-            listeners={{
-              focus: () => console.log('OnboardingScreen FOCUSED')
-            }}
+            listeners={{ focus: () => console.log('OnboardingScreen FOCUSED') }}
           />
           <Stack.Screen 
             name={ROUTES.LOGIN} 
             component={LoginScreen} 
             options={{ gestureEnabled: true }}
-            listeners={{
-              focus: () => console.log('LoginScreen FOCUSED')
-            }}
+            listeners={{ focus: () => console.log('LoginScreen FOCUSED') }}
           />
           <Stack.Screen 
             name={ROUTES.SIGNUP} 
             component={SignupScreen} 
             options={{ gestureEnabled: true }}
-            listeners={{
-              focus: () => console.log('SignupScreen FOCUSED')
-            }}
+            listeners={{ focus: () => console.log('SignupScreen FOCUSED') }}
           />
           <Stack.Screen 
             name={ROUTES.EXPERIENCE_LEVEL} 
             component={ExperienceLevelScreen} 
-            listeners={{
-              focus: () => console.log('ExperienceLevelScreen FOCUSED')
-            }}
+            listeners={{ focus: () => console.log('ExperienceLevelScreen FOCUSED') }}
           />
           
           {/* メイン */}
@@ -157,27 +175,48 @@ const AppNavigator = () => {
             name={ROUTES.MAIN} 
             component={MainTabNavigator} 
             options={{ gestureEnabled: false }}
-            listeners={{
-              focus: () => console.log('MainTabNavigator FOCUSED')
-            }}
+            listeners={{ focus: () => console.log('MainTabNavigator FOCUSED') }}
           />
           
-          {/* コーヒー記録フロー */}
+          {/* 探検フロー */}
           <Stack.Screen 
-            name={ROUTES.COFFEE_RECORD_FLOW} 
-            component={CoffeeRecordNavigator} 
-            listeners={{
-              focus: () => console.log('CoffeeRecordNavigator FOCUSED')
-            }}
+            name={ROUTES.EXPLORATION_FLOW} 
+            component={ExplorationInfoScreen} 
+            listeners={{ focus: () => console.log('ExplorationInfoScreen FOCUSED') }}
+          />
+          <Stack.Screen 
+            name={ROUTES.EXPLORATION_TASTE_MAP} 
+            component={ExplorationTasteMapScreen} 
+            listeners={{ focus: () => console.log('ExplorationTasteMapScreen FOCUSED') }}
+          />
+          <Stack.Screen 
+            name={ROUTES.EXPLORATION_PREFERENCES} 
+            component={ExplorationPreferencesScreen} 
+            listeners={{ focus: () => console.log('ExplorationPreferencesScreen FOCUSED') }}
+          />
+          <Stack.Screen 
+            name={ROUTES.EXPLORATION_COMPARISON} 
+            component={ExplorationComparisonScreen} 
+            listeners={{ focus: () => console.log('ExplorationComparisonScreen FOCUSED') }}
+          />
+          <Stack.Screen 
+            name={ROUTES.EXPLORATION_RESULT} 
+            component={ExplorationResultScreen} 
+            listeners={{ focus: () => console.log('ExplorationResultScreen FOCUSED') }}
           />
           
           {/* 設定画面 */}
           <Stack.Screen 
             name={ROUTES.API_KEY_SETTINGS} 
             component={ApiKeySettingScreen} 
-            listeners={{
-              focus: () => console.log('ApiKeySettingScreen FOCUSED')
-            }}
+            listeners={{ focus: () => console.log('ApiKeySettingScreen FOCUSED') }}
+          />
+          
+          {/* 後方互換性のための旧ルート */}
+          <Stack.Screen 
+            name={ROUTES.COFFEE_RECORD_FLOW} 
+            component={ExplorationInfoScreen} 
+            listeners={{ focus: () => console.log('旧CoffeeRecordFlow FOCUSED -> ExplorationInfoScreen') }}
           />
         </Stack.Navigator>
       </NavigationContainer>
