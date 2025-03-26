@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { Box, VStack, Heading, Text, FormControl, Input, Button, HStack, Link, useToast, Icon, Pressable } from 'native-base';
+import { Box, VStack, Heading, Text, FormControl, Button, HStack, Link, useToast, Icon, Pressable } from 'native-base';
+import { TextInput } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { Ionicons } from '@expo/vector-icons';
@@ -69,57 +70,62 @@ const LoginScreen: React.FC = () => {
         <VStack space={4} w="full">
           <FormControl>
             <FormControl.Label>メールアドレス</FormControl.Label>
-            <Input
-              autoCapitalize="none"
-              keyboardType="email-address"
+            <TextInput
+              style={{
+                height: 48,
+                borderWidth: 1,
+                borderColor: COLORS.text.light + '40',
+                borderRadius: 8,
+                paddingHorizontal: 12,
+                fontSize: 16,
+                width: '100%',
+                color: COLORS.text.primary
+              }}
               value={email}
               onChangeText={setEmail}
               placeholder="example@email.com"
-              borderColor={COLORS.text.light + '40'}
-              _focus={{ borderColor: COLORS.primary[500] }}
-              size="lg"
-              leftElement={
-                <Icon
-                  as={Ionicons}
-                  name="mail-outline"
-                  color={COLORS.text.light}
-                  size="sm"
-                  ml={2}
-                />
-              }
+              autoCapitalize="none"
+              keyboardType="email-address"
             />
           </FormControl>
 
           <FormControl>
             <FormControl.Label>パスワード</FormControl.Label>
-            <Input
-              type={showPassword ? 'text' : 'password'}
-              value={password}
-              onChangeText={setPassword}
-              placeholder="パスワード"
-              borderColor={COLORS.text.light + '40'}
-              _focus={{ borderColor: COLORS.primary[500] }}
-              size="lg"
-              leftElement={
+            <Box position="relative">
+              <TextInput
+                style={{
+                  height: 48,
+                  borderWidth: 1,
+                  borderColor: COLORS.text.light + '40',
+                  borderRadius: 8,
+                  paddingHorizontal: 12,
+                  paddingRight: 40, // アイコンのスペース
+                  fontSize: 16,
+                  width: '100%',
+                  color: COLORS.text.primary
+                }}
+                value={password}
+                onChangeText={setPassword}
+                placeholder="パスワード"
+                secureTextEntry={!showPassword}
+                autoCapitalize="none"
+              />
+              <Pressable 
+                onPress={() => setShowPassword(!showPassword)}
+                position="absolute"
+                right={2}
+                top="50%"
+                style={{transform: [{translateY: -12}]}}
+                p={2}
+              >
                 <Icon
                   as={Ionicons}
-                  name="lock-closed-outline"
+                  name={showPassword ? 'eye-off-outline' : 'eye-outline'}
                   color={COLORS.text.light}
                   size="sm"
-                  ml={2}
                 />
-              }
-              rightElement={
-                <Pressable onPress={() => setShowPassword(!showPassword)} mr={2}>
-                  <Icon
-                    as={Ionicons}
-                    name={showPassword ? 'eye-off-outline' : 'eye-outline'}
-                    color={COLORS.text.light}
-                    size="sm"
-                  />
-                </Pressable>
-              }
-            />
+              </Pressable>
+            </Box>
             <Link
               alignSelf="flex-end"
               _text={{ color: COLORS.primary[500], fontSize: 'xs' }}
