@@ -34,6 +34,7 @@ const CoffeeResultScreen: React.FC = () => {
     tags,
     resetForm,
     isSubmitting,
+    setLanguageResult,
   } = useCoffeeRecord();
   
   // Firebase連携のためのフック
@@ -75,9 +76,11 @@ const CoffeeResultScreen: React.FC = () => {
   // 言語結果がない場合のフォールバック対応
   useEffect(() => {
     if (!languageResult || languageResult.trim() === '') {
-      // 直接Hooksを呼び出さずにすでに取得したsetLanguageResultを使用
-      if (typeof setLanguageResult === 'function') {
+      try {
+        console.log('Using fallback values instead');
         setLanguageResult('バランスの取れた味わいと心地よい余韻を持つ魅力的なコーヒー');
+      } catch (error) {
+        console.error('Error setting language result:', error);
       }
     }
   }, [languageResult, setLanguageResult]);

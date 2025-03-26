@@ -143,11 +143,14 @@ export const useCoffeeRecord = () => {
     setBody,
     setFlavor,
     setAftertaste,
+    setLanguageResult,
+    setTags,
     
     // アクション
     uploadPhoto,
     generateLanguage,
     saveRecord,
     resetForm,
+    reset  // フォームを完全にリセットするZustandの直接的な関数も含める
   };
 };
