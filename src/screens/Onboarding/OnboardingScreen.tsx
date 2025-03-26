@@ -1,13 +1,17 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Box, Text, VStack, Image, HStack, Heading, Center, useTheme, Icon } from 'native-base';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { Ionicons } from '@expo/vector-icons';
+import { Alert } from 'react-native';
 
 import { Button } from '../../components/ui/Button';
 import { RootStackParamList } from '../../types';
 import { ROUTES } from '../../constants/routes';
 import { COLORS } from '../../constants/theme';
+
+// デバッグ用
+console.log('OnboardingScreen.tsxファイルが読み込まれました');
 
 // オンボーディングスライドの内容
 const slides = [
@@ -31,6 +35,21 @@ const slides = [
 type OnboardingNavigationProp = NativeStackNavigationProp<RootStackParamList, 'Onboarding'>;
 
 const OnboardingScreen: React.FC = () => {
+  console.log('OnboardingScreen コンポーネントがレンダリングされました');
+  
+  useEffect(() => {
+    console.log('OnboardingScreen マウントされました');
+    
+    // デバッグ用のアラート (開発時のみ)
+    if (__DEV__) {
+      Alert.alert('OnboardingScreen', 'オンボーディング画面が表示されました');
+    }
+    
+    return () => {
+      console.log('OnboardingScreen アンマウントされました');
+    };
+  }, []);
+  
   const [currentSlide, setCurrentSlide] = useState(0);
   const navigation = useNavigation<OnboardingNavigationProp>();
   const theme = useTheme();

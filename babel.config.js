@@ -19,7 +19,7 @@ module.exports = function(api) {
         "allowlist": null,
         "safe": false,
         "allowUndefined": true,
-        "verbose": false
+        "verbose": true
       }],
       // テスト用の変換を追加
       isTest && '@babel/plugin-transform-modules-commonjs',

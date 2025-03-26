@@ -22,7 +22,6 @@ jest.mock('../../src/hooks/useLanguageGeneration');
 // Native Base UIコンポーネントのモック
 jest.mock('native-base', () => {
   return {
-    ...jest.requireActual('native-base'),
     Box: ({ children, ...props }) => (
       <div data-testid="Box" {...props}>{children}</div>
     ),

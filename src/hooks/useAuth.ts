@@ -78,28 +78,80 @@ export const useAuth = () => {
 
   // 認証状態の監視
   useEffect(() => {
-    setLoading(true);
-    
-    const unsubscribe = onAuthStateChanged(auth, async (fbUser) => {
-      try {
-        if (fbUser) {
-          setFirebaseUser(fbUser);
-          
-          const userProfile = await getUserProfile(fbUser);
-          setUser(userProfile);
-        } else {
-          setFirebaseUser(null);
-          setUser(null);
-        }
-      } catch (error) {
-        console.error('Auth state change error:', error);
-      } finally {
+    // 安全のため3秒後にローディング状態を強制解除するタイマーを設定
+    const safetyTimer = setTimeout(() => {
+      if (loading) {
+        console.log('useAuth: 安全タイマー発動 - ローディング状態を強制解除');
         setLoading(false);
         setInitialized(true);
       }
-    });
+    }, 3000);
+
+    setLoading(true);
+    console.log('useAuth: 認証状態の監視を開始');
     
-    return () => unsubscribe();
+    try {
+      // Firebase設定のデバッグ情報
+      console.log('Firebase auth object exists:', !!auth);
+      
+      // コールバックを強制的に一度だけ実行するため、手動でメソッドを呼び出す
+      const currentUser = auth.currentUser;
+      console.log('Current user from direct call:', currentUser ? 'exists' : 'null');
+      
+      // 現在のユーザー状態を処理
+      const processUser = async (fbUser: FirebaseUser | null) => {
+        try {
+          if (fbUser) {
+            console.log('useAuth: ユーザーログイン済み', fbUser.uid);
+            setFirebaseUser(fbUser);
+            
+            console.log('useAuth: ユーザープロファイル取得開始');
+            const userProfile = await getUserProfile(fbUser);
+            console.log('useAuth: ユーザープロファイル取得完了', userProfile ? 'success' : 'failed');
+            setUser(userProfile);
+          } else {
+            console.log('useAuth: ユーザー未ログイン');
+            setFirebaseUser(null);
+            setUser(null);
+          }
+        } catch (error) {
+          console.error('Auth state change error:', error);
+          setError(error instanceof Error ? error.message : '認証状態の監視中にエラーが発生しました');
+        } finally {
+          console.log('useAuth: ローディング完了、初期化完了');
+          clearTimeout(safetyTimer); // 安全タイマーをクリア
+          setLoading(false);
+          setInitialized(true);
+        }
+      };
+      
+      // 現在のユーザー状態を即座に処理
+      processUser(currentUser);
+      
+      // 状態変更監視も設定
+      const unsubscribe = onAuthStateChanged(auth, async (fbUser) => {
+        console.log('useAuth: Auth状態変更検出');
+        await processUser(fbUser);
+      }, (error) => {
+        console.error('Auth state observer error:', error);
+        setError(error instanceof Error ? error.message : '認証状態の監視中にエラーが発生しました');
+        setLoading(false);
+        setInitialized(true);
+      });
+      
+      return () => {
+        clearTimeout(safetyTimer);
+        unsubscribe();
+      };
+    } catch (error) {
+      console.error('useAuth setup error:', error);
+      setError(error instanceof Error ? error.message : '認証設定中にエラーが発生しました');
+      setLoading(false);
+      setInitialized(true);
+      return () => {
+        clearTimeout(safetyTimer);
+      };
+    }
   }, []);
 
   /**
