@@ -73,23 +73,35 @@ const DictionaryScreen: React.FC = () => {
       <VStack space={6}>
         {/* 検索バー */}
         <Box px={2}>
-          <Input
-            placeholder="用語を検索"
-            value={searchQuery}
-            onChangeText={setSearchQuery}
-            InputLeftElement={
-              <Icon
-                as={Ionicons}
-                name="search"
-                size="sm"
-                color={COLORS.text.light}
-                ml={2}
-              />
-            }
-            bg="white"
-            borderRadius="full"
+          <Box 
+            bg="white" 
+            borderWidth={1} 
+            borderRadius="full" 
             borderColor={COLORS.text.light}
-          />
+            flexDirection="row"
+            alignItems="center"
+          >
+            <Icon
+              as={Ionicons}
+              name="search"
+              size="sm"
+              color={COLORS.text.light}
+              ml={2}
+            />
+            <TextInput
+              style={{
+                flex: 1,
+                height: 40,
+                paddingHorizontal: 8,
+                fontSize: 16,
+                color: COLORS.text.primary,
+              }}
+              placeholder="用語を検索"
+              value={searchQuery}
+              onChangeText={setSearchQuery}
+              autoCapitalize="none"
+            />
+          </Box>
         </Box>
 
         {/* 理解度別用語 */}

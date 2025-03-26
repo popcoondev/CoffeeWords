@@ -8,7 +8,6 @@ import {
   Pressable, 
   Text, 
   ScrollView,
-  Input,
   FormControl,
   Switch,
   Center,
@@ -17,6 +16,7 @@ import {
   useToast,
   Divider
 } from 'native-base';
+import { TextInput, StyleSheet, Platform } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { Ionicons } from '@expo/vector-icons';
@@ -174,15 +174,22 @@ const ApiKeySettingScreen: React.FC = () => {
             <Heading size="sm">{hasKey ? "APIキーを更新" : "APIキーを設定"}</Heading>
             <FormControl>
               <FormControl.Label>APIキー</FormControl.Label>
-              <Input
-                value={apiKey}
-                onChangeText={setApiKey}
-                placeholder="sk-..."
-                type={showApiKey ? "text" : "password"}
-                autoCapitalize="none"
-                autoCorrect={false}
-                fontFamily="monospace"
-              />
+              <Box 
+                borderWidth={1} 
+                borderRadius="md"
+                borderColor={COLORS.text.light}
+              >
+                <TextInput
+                  style={styles.input}
+                  value={apiKey}
+                  onChangeText={setApiKey}
+                  placeholder="sk-..."
+                  secureTextEntry={!showApiKey}
+                  autoCapitalize="none"
+                  autoCorrect={false}
+                  fontFamily="monospace"
+                />
+              </Box>
               <FormControl.HelperText>
                 接頭辞「sk-」で始まるOpenAI APIキーを入力してください
               </FormControl.HelperText>
@@ -228,5 +235,17 @@ const ApiKeySettingScreen: React.FC = () => {
     </Box>
   );
 };
+
+const styles = StyleSheet.create({
+  input: {
+    height: 48,
+    paddingHorizontal: 12,
+    paddingVertical: Platform.OS === 'ios' ? 12 : 8,
+    fontSize: 16,
+    color: COLORS.text.primary,
+    width: '100%',
+    fontFamily: 'monospace',
+  }
+});
 
 export default ApiKeySettingScreen;
