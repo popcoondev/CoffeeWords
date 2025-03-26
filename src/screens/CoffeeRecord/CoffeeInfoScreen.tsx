@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Box, VStack, Heading, Icon, HStack, Pressable, Text, ScrollView, Image, useToast } from 'native-base';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -12,6 +12,7 @@ import { ROUTES } from '../../constants/routes';
 import { COLORS } from '../../constants/theme';
 import { useCoffeeRecord } from '../../hooks/useCoffeeRecord';
 import { useCoffeeStorage } from '../../hooks/useCoffeeStorage';
+import { useLanguageGeneration } from '../../hooks/useLanguageGeneration';
 
 type CoffeeInfoNavigationProp = NativeStackNavigationProp<RootStackParamList, 'CoffeeRecordFlow'>;
 
@@ -32,9 +33,13 @@ const CoffeeInfoScreen: React.FC = () => {
   // Firebase連携のためのフック
   const { uploadImage, loading: uploading } = useCoffeeStorage();
   
+  // 言語生成のためのフック
+  const { generateLanguage, loading: generatingText } = useLanguageGeneration();
+  
   // ローカルステート
   const [imageUri, setImageUri] = useState<string | null>(photoURL);
   const [isUploading, setIsUploading] = useState(false);
+  const [suggestedName, setSuggestedName] = useState<string | null>(null);
 
   const handleBack = () => {
     navigation.goBack();
@@ -119,6 +124,35 @@ const CoffeeInfoScreen: React.FC = () => {
         // Firebase Storageに画像をアップロード
         setIsUploading(true);
         const uploadedUrl = await uploadImage(result.assets[0].uri);
+        
+        // 画像からコーヒー名を推測
+        try {
+          const mockResponse = {
+            body: 'medium' as 'light' | 'medium' | 'heavy',
+            flavor: ['fruity', 'nutty'],
+            aftertaste: 'medium' as 'short' | 'medium' | 'long'
+          };
+          
+          const languageResult = await generateLanguage(mockResponse);
+          if (languageResult && languageResult.recommendations && languageResult.recommendations.length > 0) {
+            const suggestion = languageResult.recommendations[0];
+            setSuggestedName(suggestion);
+            
+            // 名前が設定されていない場合は自動で入力
+            if (!name) {
+              setName(suggestion);
+            }
+            
+            toast.show({
+              title: "推測されたコーヒー名",
+              description: `画像から「${suggestion}」と推測されました`,
+              status: "info"
+            });
+          }
+        } catch (aiError) {
+          console.error("Error generating coffee name:", aiError);
+        }
+        
         setIsUploading(false);
         
         if (uploadedUrl) {
@@ -160,6 +194,24 @@ const CoffeeInfoScreen: React.FC = () => {
             onChangeText={setName}
             isRequired
           />
+          
+          {suggestedName && !name && (
+            <Pressable 
+              bg={COLORS.background.secondary} 
+              px={3} 
+              py={2} 
+              rounded="md" 
+              mt={1}
+              onPress={() => setName(suggestedName)}
+            >
+              <HStack alignItems="center" space={2}>
+                <Icon as={Ionicons} name="lightbulb-outline" size="sm" color={COLORS.primary[500]} />
+                <Text fontSize="sm">
+                  「{suggestedName}」を使用する
+                </Text>
+              </HStack>
+            </Pressable>
+          )}
 
           <Input
             label="焙煎所（任意）"

@@ -75,7 +75,7 @@ const HomeScreen: React.FC = () => {
           </Card>
         </VStack>
 
-        {/* 今日のコーヒーを記録 - FABに移行したため非表示
+        {/* 今日のコーヒーを記録 */}
         <VStack space={2}>
           <Heading size="md">今日のコーヒーを記録</Heading>
           <Card>
@@ -97,7 +97,6 @@ const HomeScreen: React.FC = () => {
             </VStack>
           </Card>
         </VStack>
-        */}
 
         {/* あなたの発見 */}
         <VStack space={2}>
