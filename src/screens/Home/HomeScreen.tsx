@@ -61,26 +61,29 @@ const HomeScreen: React.FC = () => {
         console.log('開発環境: モックデータを使用');
         
         // モックの探検データ
+        const now = new Date();
         const mockExplorations: CoffeeExploration[] = [
           {
             id: 'mock-exploration-1',
             userId: user.id || 'mock-user',
-            createdAt: new Date(),
+            createdAt: now,
             coffeeInfo: {
               name: 'エチオピア イルガチェフェ',
-              roaster: 'モックロースター',
-              origin: 'エチオピア'
+              roaster: 'オニバスコーヒー',
+              origin: 'エチオピア',
+              photoURL: 'https://example.com/coffee1.jpg'
             },
             tasteMapPosition: { x: 150, y: 200 },
             preferences: {
               overallRating: 4,
               likedPoints: ['フルーティー', '明るい酸味'],
+              likedPointsDetail: '何よりも明るい酸が印象的で、フルーツのような甘さがあった',
               wouldDrinkAgain: 4,
-              drinkingScene: ['朝']
+              drinkingScene: ['朝', '休日']
             },
             analysis: {
-              professionalDescription: 'フローラルな香りとベリーのような風味を持つ明るい酸味のコーヒー',
-              personalTranslation: '花の香りがあり、さわやかな酸味が特徴的',
+              professionalDescription: 'フローラルな香りとベリーのような風味を持つ明るい酸味のコーヒー。レモンやライムを思わせるシトラス感と、紅茶のような滑らかな後味が特徴。',
+              personalTranslation: '花の香りがあり、さわやかな酸味が特徴的。飲んだ後に紅茶のような味わいが残る。',
               tasteProfile: {
                 acidity: 4,
                 sweetness: 3,
@@ -88,7 +91,7 @@ const HomeScreen: React.FC = () => {
                 body: 2,
                 complexity: 4
               },
-              preferenceInsight: 'あなたは明るい酸味を好む傾向があります',
+              preferenceInsight: 'あなたは明るい酸味を好む傾向があります。フルーティーな風味と花のような香りのコーヒーを特に気に入る傾向が見られます。',
               discoveredFlavor: {
                 name: 'ベリー系フルーツの酸味',
                 category: 'acidity',
@@ -96,7 +99,92 @@ const HomeScreen: React.FC = () => {
                 rarity: 3,
                 userInterpretation: 'フルーツジュースのような爽やかさ'
               },
-              nextExploration: 'ケニア産のコーヒーも試してみると良いでしょう'
+              nextExploration: 'ケニア産のコーヒーも試してみると良いでしょう。ケニア産は明るい酸味にトマトのようなうま味が加わり、複雑さが増します。'
+            }
+          },
+          {
+            id: 'mock-exploration-2',
+            userId: user.id || 'mock-user',
+            createdAt: new Date(now.getTime() - 2 * 24 * 60 * 60 * 1000), // 2日前
+            coffeeInfo: {
+              name: 'ブラジル セラード',
+              roaster: '丸山珈琲',
+              origin: 'ブラジル',
+              photoURL: 'https://example.com/coffee2.jpg'
+            },
+            tasteMapPosition: { x: 250, y: 300 },
+            preferences: {
+              overallRating: 3,
+              likedPoints: ['コク', 'チョコレート感'],
+              likedPointsDetail: '安定した味わいでチョコレートのような甘さが感じられた',
+              dislikedPoints: ['単調さ'],
+              dislikedPointsDetail: '少し特徴が薄く感じられた',
+              wouldDrinkAgain: 3,
+              drinkingScene: ['午後', '仕事中']
+            },
+            analysis: {
+              professionalDescription: 'ナッツとチョコレート風味の低めの酸味とコクのあるバランスの取れたコーヒー。キャラメルのような甘さとスモーキーな後味が特徴。',
+              personalTranslation: 'ナッツのような香ばしさとチョコレートのような甘さを感じる。どっしりとした飲み心地で、飲みやすい。',
+              tasteProfile: {
+                acidity: 2,
+                sweetness: 3,
+                bitterness: 3,
+                body: 4,
+                complexity: 2
+              },
+              preferenceInsight: 'バランスの取れたコーヒーも楽しめる傾向があります。特に香ばしさと甘みのバランスがよいコーヒーを好む傾向が見られます。',
+              discoveredFlavor: {
+                name: 'ナッツの香ばしさ',
+                category: 'aroma',
+                description: 'アーモンドやヘーゼルナッツを連想させる香ばしさ',
+                rarity: 2,
+                userInterpretation: '香ばしいクッキーのような香り'
+              },
+              nextExploration: 'コロンビア産のコーヒーも試してみると良いでしょう。ブラジルと似た安定感がありながらも、フルーティーさが加わって複雑さが増します。'
+            }
+          },
+          {
+            id: 'mock-exploration-3',
+            userId: user.id || 'mock-user',
+            createdAt: new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000), // 1週間前
+            coffeeInfo: {
+              name: 'グアテマラ アンティグア',
+              roaster: 'スターバックス',
+              origin: 'グアテマラ',
+              photoURL: 'https://example.com/coffee3.jpg'
+            },
+            tasteMapPosition: { x: 200, y: 250 },
+            preferences: {
+              overallRating: 4,
+              likedPoints: ['バランス', 'チョコレート感', '柑橘系の酸味'],
+              likedPointsDetail: '酸味と苦味のバランスが良く、オレンジのような風味も感じられた',
+              wouldDrinkAgain: 5,
+              drinkingScene: ['いつでも', '食後']
+            },
+            comparison: {
+              comparedToId: 'mock-exploration-1',
+              preferenceCompared: 'same',
+              notedDifferences: 'エチオピアより酸味は控えめですが、バランスが取れていて飲みやすいです'
+            },
+            analysis: {
+              professionalDescription: 'チョコレートとオレンジピールのような風味を持つバランスの取れたコーヒー。中程度の酸味と滑らかなボディが特徴。',
+              personalTranslation: 'チョコレートオレンジのお菓子のような香りと味わい。強すぎず弱すぎない、ちょうどいいバランス。',
+              tasteProfile: {
+                acidity: 3,
+                sweetness: 3,
+                bitterness: 3,
+                body: 3,
+                complexity: 3
+              },
+              preferenceInsight: 'バランスのとれたコーヒーを特に好む傾向があります。酸味と甘みが調和したコーヒーを最も評価していることが分かります。',
+              discoveredFlavor: {
+                name: 'チョコレートオレンジの風味',
+                category: 'sweetness',
+                description: 'ダークチョコレートとオレンジピールを組み合わせたような複雑な甘さ',
+                rarity: 3,
+                userInterpretation: 'チョコレートオレンジのお菓子のような味わい'
+              },
+              nextExploration: 'コスタリカ産のコーヒーも試してみると良いでしょう。バランスが取れていながらも、ハニーなどの処理方法によって様々な表情を見せてくれます。'
             }
           }
         ];
@@ -106,10 +194,10 @@ const HomeScreen: React.FC = () => {
           {
             id: 'mock-mission-1',
             userId: user.id || 'mock-user',
-            createdAt: new Date(),
-            expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+            createdAt: now,
+            expiresAt: new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000), // 1週間後
             title: '酸味と甘みのバランスを探す',
-            description: '酸味と甘みのバランスが良いコーヒーを見つけて記録しましょう',
+            description: '酸味と甘みのバランスが良いコーヒーを見つけて記録しましょう。バランスの取れた味わいは、多くのコーヒー愛好家に親しまれています。',
             difficulty: 'beginner',
             type: 'discovery',
             objectives: {
@@ -122,6 +210,47 @@ const HomeScreen: React.FC = () => {
             },
             relatedCoffeeRecommendations: ['エチオピア イルガチェフェ', 'グアテマラ アンティグア'],
             helpTips: ['浅煎りのコーヒーを探してみましょう', '準備中の豆を確認してみましょう']
+          },
+          {
+            id: 'mock-mission-2',
+            userId: user.id || 'mock-user',
+            createdAt: new Date(now.getTime() - 1 * 24 * 60 * 60 * 1000), // 1日前
+            expiresAt: new Date(now.getTime() + 3 * 24 * 60 * 60 * 1000), // 3日後
+            title: 'フルーティーな味わいを比較する',
+            description: '異なる産地のフルーティーなコーヒーを2種類飲み比べて、それぞれの違いを記録しましょう。味覚の比較は理解を深めます。',
+            difficulty: 'intermediate',
+            type: 'comparison',
+            objectives: {
+              targetFlavorCategory: 'aroma',
+              comparisonCoffeeId: 'mock-exploration-1',
+              specificTask: 'フルーティーな風味を持つ異なる2種類のコーヒーを比較する'
+            },
+            status: 'active',
+            reward: {
+              experiencePoints: 25,
+              badgeId: 'taste-explorer'
+            },
+            relatedCoffeeRecommendations: ['ケニア ニエリ', 'エチオピア シダモ', 'コロンビア ウイラ'],
+            helpTips: ['一つはすでに試したエチオピアとの比較がおすすめです', '時間を空けずに飲み比べると違いが分かりやすいです']
+          },
+          {
+            id: 'mock-mission-3',
+            userId: user.id || 'mock-user',
+            createdAt: new Date(now.getTime() - 5 * 24 * 60 * 60 * 1000), // 5日前
+            expiresAt: new Date(now.getTime() + 2 * 24 * 60 * 60 * 1000), // 2日後
+            title: '今日のコーヒー探検',
+            description: '今日飲んだコーヒーの記録を登録しましょう。定期的な記録は味覚を育てます。',
+            difficulty: 'beginner',
+            type: 'daily',
+            objectives: {
+              specificTask: '今日飲んだコーヒーを記録する'
+            },
+            status: 'active',
+            reward: {
+              experiencePoints: 5
+            },
+            relatedCoffeeRecommendations: [],
+            helpTips: ['普段飲み慣れているコーヒーでも、じっくり味わうと新しい発見があるかもしれません']
           }
         ];
         
