@@ -15,8 +15,8 @@ import { getExploration } from '../../services/firebase/exploration';
  * 以前のコーヒー記録と比較する
  */
 const ExplorationComparisonScreen: React.FC = () => {
-  const navigation = useNavigation<ScreenProps<'ExplorationComparison'>['navigation']>();
-  const route = useRoute<ScreenProps<'ExplorationComparison'>['route']>();
+  const navigation = useNavigation();
+  const route = useRoute();
   const toast = useToast();
   
   // パラメータから取得

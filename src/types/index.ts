@@ -1,3 +1,6 @@
+import { RouteProp } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+
 // ユーザー関連の型定義
 export interface User {
   id: string;
@@ -21,6 +24,7 @@ export type RootStackParamList = {
   Main: undefined;
   Home: { decodeResult?: DecodeResult };
   Dictionary: { newDiscovery?: DiscoveredFlavor };
+  TranslationDictionary: { newDiscovery?: DiscoveredFlavor };
   TasteMap: undefined;
   
   // 探検フロー (旧コーヒー記録フロー)
@@ -289,3 +293,8 @@ export interface Notification {
     explorationId?: string;
   };
 }
+
+export type ScreenProps<T extends keyof RootStackParamList> = {
+  navigation: NativeStackNavigationProp<RootStackParamList, T>;
+  route: RouteProp<RootStackParamList, T>;
+};

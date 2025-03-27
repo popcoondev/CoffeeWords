@@ -17,8 +17,8 @@ import { useDictionaryStore } from '../../store/useDictionaryStore';
  * コーヒー用語の専門的な定義とユーザー自身の解釈を管理する
  */
 const TranslationDictionaryScreen: React.FC = () => {
-  const navigation = useNavigation<ScreenProps<'TranslationDictionary'>['navigation']>();
-  const route = useRoute<ScreenProps<'TranslationDictionary'>['route']>();
+  const navigation = useNavigation();
+  const route = useRoute();
   const toast = useToast();
   const { user } = useAuth();
   

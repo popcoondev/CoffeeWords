@@ -16,7 +16,7 @@ import TasteMap from '../../components/map/TasteMap';
  * 味わい探検マップ画面
  */
 const TasteMapScreen: React.FC = () => {
-  const navigation = useNavigation<ScreenProps<'TasteMap'>['navigation']>();
+  const navigation = useNavigation();
   const toast = useToast();
   const { user } = useAuth();
   
@@ -193,8 +193,8 @@ const TasteMapScreen: React.FC = () => {
                         w={3}
                         h={3}
                         rounded="full"
-                        top={exploration.tasteMapPosition.y}
-                        left={exploration.tasteMapPosition.x}
+                        top={exploration.tasteMapPosition?.y || 200}
+                        left={exploration.tasteMapPosition?.x || 200}
                         style={{ transform: [{ translateX: -6 }, { translateY: -6 }] }}
                       />
                     ))}

@@ -16,8 +16,8 @@ import { getDictionaryTerm, incrementDiscoveryCount, updateDictionaryTerm } from
  * 用語の詳細情報を表示し、マスターレベルの更新や関連用語の閲覧ができる
  */
 const TermDetailScreen: React.FC = () => {
-  const navigation = useNavigation<ScreenProps<'TermDetail'>['navigation']>();
-  const route = useRoute<ScreenProps<'TermDetail'>['route']>();
+  const navigation = useNavigation();
+  const route = useRoute();
   const toast = useToast();
   const termId = route.params?.termId;
   

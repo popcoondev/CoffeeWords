@@ -16,8 +16,8 @@ import { useAuth } from '../../hooks/useAuth';
  * ホーム画面（今日の探検）
  */
 const HomeScreen: React.FC = () => {
-  const navigation = useNavigation<ScreenProps<'Home'>['navigation']>();
-  const route = useRoute<ScreenProps<'Home'>['route']>();
+  const navigation = useNavigation();
+  const route = useRoute();
   const toast = useToast();
   const { user } = useAuth();
   

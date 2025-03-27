@@ -14,8 +14,8 @@ import { ScreenProps, CoffeeExploration } from '../../types';
  * コーヒーの主観的な評価や感想を入力する
  */
 const ExplorationPreferencesScreen: React.FC = () => {
-  const navigation = useNavigation<ScreenProps<'ExplorationPreferences'>['navigation']>();
-  const route = useRoute<ScreenProps<'ExplorationPreferences'>['route']>();
+  const navigation = useNavigation();
+  const route = useRoute();
   const toast = useToast();
   
   // パラメータから取得

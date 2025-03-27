@@ -18,8 +18,8 @@ import { useAuth } from '../../hooks/useAuth';
  * コーヒーの解読結果を表示する
  */
 const ExplorationResultScreen: React.FC = () => {
-  const navigation = useNavigation<ScreenProps<'ExplorationResult'>['navigation']>();
-  const route = useRoute<ScreenProps<'ExplorationResult'>['route']>();
+  const navigation = useNavigation();
+  const route = useRoute();
   const toast = useToast();
   const { user } = useAuth();
   

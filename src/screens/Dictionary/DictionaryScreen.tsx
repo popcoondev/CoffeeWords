@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Box, VStack, Heading, Text, HStack, Pressable, Icon, ScrollView, Input } from 'native-base';
+import { TextInput, StyleSheet } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { Ionicons } from '@expo/vector-icons';
@@ -89,13 +90,7 @@ const DictionaryScreen: React.FC = () => {
               ml={2}
             />
             <TextInput
-              style={{
-                flex: 1,
-                height: 40,
-                paddingHorizontal: 8,
-                fontSize: 16,
-                color: COLORS.text.primary,
-              }}
+              style={styles.searchInput}
               placeholder="用語を検索"
               value={searchQuery}
               onChangeText={setSearchQuery}
@@ -203,5 +198,15 @@ const DictionaryScreen: React.FC = () => {
     </ScrollView>
   );
 };
+
+const styles = StyleSheet.create({
+  searchInput: {
+    flex: 1,
+    height: 40,
+    paddingHorizontal: 8,
+    fontSize: 16,
+    color: COLORS.text.primary,
+  }
+});
 
 export default DictionaryScreen;

@@ -16,8 +16,8 @@ import { extractMapCharacteristics } from '../../services/openai/prompts';
  * コーヒーの味わいをマップ上で位置付ける
  */
 const ExplorationTasteMapScreen: React.FC = () => {
-  const navigation = useNavigation<ScreenProps<'ExplorationTasteMap'>['navigation']>();
-  const route = useRoute<ScreenProps<'ExplorationTasteMap'>['route']>();
+  const navigation = useNavigation();
+  const route = useRoute();
   const toast = useToast();
   
   // パラメータから取得

@@ -8,7 +8,7 @@ import { COLORS } from '../constants/theme';
 
 // スクリーン
 import HomeScreen from '../screens/Home/HomeScreen';
-import DictionaryScreen from '../screens/Dictionary/DictionaryScreen'; // 後で翻訳辞書画面に変更予定
+import TranslationDictionaryScreen from '../screens/Translation/TranslationDictionaryScreen';
 import TasteMapScreen from '../screens/TasteMap/TasteMapScreen'; // 新しい画面
 
 const Tab = createBottomTabNavigator();
@@ -31,16 +31,18 @@ const MainTabNavigator = () => {
       >
         {state.routes.map((route: any, index: number) => {
           const { options } = descriptors[route.key];
-          const label = options.tabBarLabel || options.title || route.name;
+          const label = options.tabBarLabel || options.title || route.name || 'タブ';
           const isFocused = state.index === index;
 
-          let iconName = '';
-          if (route.name === ROUTES.HOME) {
-            iconName = isFocused ? 'compass' : 'compass-outline';
-          } else if (route.name === ROUTES.DICTIONARY) {
-            iconName = isFocused ? 'book' : 'book-outline';
-          } else if (route.name === ROUTES.TASTE_MAP) {
-            iconName = isFocused ? 'map' : 'map-outline';
+          let iconName = 'help-outline'; // デフォルトアイコン
+          if (route.name) {
+            if (route.name === ROUTES.HOME) {
+              iconName = isFocused ? 'compass' : 'compass-outline';
+            } else if (route.name === ROUTES.TRANSLATION_DICTIONARY) {
+              iconName = isFocused ? 'book' : 'book-outline';
+            } else if (route.name === ROUTES.TASTE_MAP) {
+              iconName = isFocused ? 'map' : 'map-outline';
+            }
           }
 
           const onPress = () => {
@@ -50,7 +52,7 @@ const MainTabNavigator = () => {
               canPreventDefault: true,
             });
 
-            if (!isFocused && !event.defaultPrevented) {
+            if (!isFocused && !event.defaultPrevented && route.name) {
               navigation.navigate(route.name);
             }
           };
@@ -105,8 +107,8 @@ const MainTabNavigator = () => {
         options={{ title: '今日の探検' }}
       />
       <Tab.Screen 
-        name={ROUTES.DICTIONARY} 
-        component={DictionaryScreen} 
+        name={ROUTES.TRANSLATION_DICTIONARY} 
+        component={TranslationDictionaryScreen} 
         options={{ title: '翻訳辞書' }}
       />
       <Tab.Screen 

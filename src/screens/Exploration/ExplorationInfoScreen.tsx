@@ -17,7 +17,7 @@ import { ScreenProps } from '../../types';
  * コーヒーの基本情報（名前、焙煎所、産地）と写真を入力する
  */
 const ExplorationInfoScreen: React.FC = () => {
-  const navigation = useNavigation<ScreenProps<'ExplorationInfo'>['navigation']>();
+  const navigation = useNavigation();
   const toast = useToast();
   
   // Exploration Store
