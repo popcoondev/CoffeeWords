@@ -2,8 +2,22 @@ import { registerRootComponent } from 'expo';
 import { enableScreens } from 'react-native-screens';
 
 // React Navigation の準備を整える
-// これにより、画面名に関する問題を軽減できる可能性があります
 enableScreens();
+
+// Firebaseモードのデフォルト値を設定
+// これは firebase.ts がインポートされる前に実行される必要がある
+if (__DEV__) {
+  // 開発環境ではデフォルトでモックモード
+  (global as any).__FIREBASE_MODE__ = 'mock';
+  (global as any).__FIREBASE_MOCK_MODE__ = true;
+  (global as any).__FIREBASE_REAL_MODE__ = false;
+  console.log('Firebase Mock Mode enabled by default in development');
+} else {
+  // 本番環境ではデフォルトで本番モード
+  (global as any).__FIREBASE_MODE__ = 'production';
+  (global as any).__FIREBASE_MOCK_MODE__ = false;
+  (global as any).__FIREBASE_REAL_MODE__ = true;
+}
 
 import App from './App';
 

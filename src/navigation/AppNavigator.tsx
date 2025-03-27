@@ -56,26 +56,48 @@ const AppNavigator = () => {
   // すべてのhooksは条件分岐よりも前に宣言する
   const navigationRef = useRef<NavigationContainerRef<any>>(null);
   const { user, loading, initialized, error } = useAuth();
+  const initialRouteRef = useRef<string | null>(null);
 
-
-  console.log('AppNavigator: レンダリング開始', { loading, initialized, hasUser: !!user, hasError: !!error });
-
-  // 初期ルートを決定
-  const getInitialRoute = () => {
-    if (user) {
-      // ユーザーが認証済みの場合
-      if (!user.experienceLevel) {
-        // 経験レベルが未設定の場合
-        console.log('AppNavigator: 経験レベル未設定ユーザー、ExperienceLevelScreenへ遷移');
-        return ROUTES.EXPERIENCE_LEVEL;
+  // 初期ルートを決定する関数
+  const determineInitialRoute = () => {
+    if (!loading && initialized) {
+      if (user) {
+        // ユーザーが認証済みの場合
+        if (!user.experienceLevel) {
+          // 経験レベルが未設定の場合
+          return ROUTES.EXPERIENCE_LEVEL;
+        }
+        return ROUTES.MAIN;
       }
-      console.log('AppNavigator: 認証済みユーザー、MAINへ遷移');
-      return ROUTES.MAIN;
+      // 未認証の場合はオンボーディングから開始
+      return ROUTES.ONBOARDING;
     }
-    // 未認証の場合はオンボーディングから開始
-    console.log('AppNavigator: 未認証ユーザー、Onboardingへ遷移');
-    return ROUTES.ONBOARDING;
+    return null;
   };
+
+  // ルートが決定されたかを追跡する参照
+  const routeDeterminedRef = useRef(false);
+  
+  // useEffectで初期ルートを設定（依存関係が変わった時だけ実行）
+  useEffect(() => {
+    // ローディング完了後かつまだルートが決定されていない場合のみ実行
+    if (!loading && initialized && !routeDeterminedRef.current) {
+      routeDeterminedRef.current = true;
+      const route = determineInitialRoute();
+      if (route) {
+        initialRouteRef.current = route;
+        console.log('Navigation初期ルート:', route);
+      }
+    }
+  }, [loading, initialized, user]);
+
+  console.log('AppNavigator: レンダリング開始', { 
+    loading, 
+    initialized, 
+    hasUser: !!user, 
+    hasError: !!error, 
+    initialRoute: initialRouteRef.current 
+  });
 
   // Firebase設定エラーを検出
   if (error && error.includes('Firebase')) {
@@ -93,9 +115,8 @@ const AppNavigator = () => {
     return <LoadingScreen message={`${loading ? 'ロード中' : ''}${!initialized ? '初期化中' : ''}`} showDebug={true} />;
   }
 
-  // 初期ルートを取得
-  const initialRoute = getInitialRoute();
-  console.log('Navigation初期ルート:', initialRoute);
+  // 初期ルートが設定されていない場合はデフォルトを使用
+  const initialRoute = initialRouteRef.current || ROUTES.ONBOARDING;
 
 
   try {

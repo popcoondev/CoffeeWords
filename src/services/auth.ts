@@ -13,9 +13,15 @@ import { User } from '../types';
 
 /**
  * モック認証モードかどうかを確認
+ * グローバル変数が設定されていない場合はデフォルトで本番モード
  */
 const isMockAuthMode = () => {
-  return (global as any).__FIREBASE_MOCK_MODE__ === true;
+  // 明示的に設定されていればその値を使用
+  if (typeof (global as any).__FIREBASE_MOCK_MODE__ === 'boolean') {
+    return (global as any).__FIREBASE_MOCK_MODE__;
+  }
+  // 設定されていなければ本番モード
+  return false;
 };
 
 /**

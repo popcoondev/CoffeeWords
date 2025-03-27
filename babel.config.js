@@ -14,7 +14,7 @@ module.exports = function(api) {
       ["module:react-native-dotenv", {
         "envName": "APP_ENV",
         "moduleName": "@env",
-        "path": ".env",
+        "path": isTest ? ".env.test" : ".env",
         "blocklist": null,
         "allowlist": null,
         "safe": false,

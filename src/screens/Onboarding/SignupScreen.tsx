@@ -72,13 +72,6 @@ const SignupScreen: React.FC = () => {
     }
 
     try {
-      // 開発環境ではメール/パスワード認証をバイパスする
-      if (__DEV__) {
-        console.log('開発環境: 認証バイパス');
-        navigation.navigate(ROUTES.EXPERIENCE_LEVEL);
-        return;
-      }
-      
       // サインアップ処理
       const success = await register(email.trim(), password, name.trim());
       if (success) {
