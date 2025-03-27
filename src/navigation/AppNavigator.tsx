@@ -144,15 +144,28 @@ const AppNavigator = () => {
     return (
       <NavigationContainer
         ref={navigationRef}
-        onReady={() => {
-          // NavigationContainerの準備完了時の処理
-          console.log('NavigationContainer: 準備完了');
-          if (!hasSetInitialRouteRef.current) {
-            const route = determineInitialRoute();
-            if (route) {
-              initialRouteRef.current = route;
-              hasSetInitialRouteRef.current = true;
-              console.log('NavigationContainer準備完了時の初期ルート設定:', route);
+        onStateChange={(state) => {
+          // ナビゲーション状態が変わった時に実行される
+          // これにより、強制的に認証状態を確認して必要に応じてルートを変更できる
+          if (state && initialized && !loading) {
+            // 現在のルート情報を取得
+            const currentRouteName = navigationRef.current?.getCurrentRoute()?.name;
+            console.log('[NavContainer] 状態変更: 現在のルート =', currentRouteName, '認証状態 =', !!user);
+            
+            // ユーザーがログインしているのにオンボーディング/ログイン画面にいるケースを修正
+            if (user && 
+               (currentRouteName === ROUTES.ONBOARDING || 
+                currentRouteName === ROUTES.LOGIN || 
+                currentRouteName === ROUTES.SIGNUP)) {
+              console.log('[NavContainer] 警告: 認証済みユーザーが認証前画面にいます。メイン画面に強制遷移します。');
+              
+              // 500ms後にメイン画面に強制遷移
+              setTimeout(() => {
+                navigationRef.current?.resetRoot({
+                  index: 0,
+                  routes: [{ name: ROUTES.MAIN }]
+                });
+              }, 500);
             }
           }
         }}

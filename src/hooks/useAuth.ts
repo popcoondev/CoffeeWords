@@ -106,14 +106,10 @@ export const useAuth = () => {
   
   // 認証状態の監視
   useEffect(() => {
-    // 既に初期化済みの場合は実行しない（無限ループ防止）
-    if (initRef.current) {
-      console.log('[Auth] 既に初期化済み、認証監視をスキップ');
-      return;
-    }
+    // 初期化フラグをリセット - 常に最新の認証状態を反映
+    initRef.current = false;
     
-    // 初期化フラグを設定
-    initRef.current = true;
+    console.log('[Auth] 認証監視を設定/更新します');
     
     console.log('[Auth] 認証状態の監視を開始');
     

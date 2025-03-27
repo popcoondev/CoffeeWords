@@ -47,31 +47,40 @@ const LoginScreen: React.FC = () => {
       if (success) {
         console.log('[Login] ログイン成功、メイン画面に遷移します');
         
-        // Firebaseの認証状態を設定するため少し待つ
-        setTimeout(() => {
-          try {
-            console.log('[Login] 強制的に今日の探索画面へ遷移');
+        try {
+          // メイン画面に強制遷移する最も確実な方法
+          console.log('[Login] 絶対確実にメイン画面へ強制遷移');
           
-            // 今日の探索画面(EXPLORATION_FLOW)に直接遷移
-            navigation.dispatch(
-              CommonActions.navigate({
-                name: ROUTES.MAIN,
-              })
-            );
-            
-            // 少し待ってから探索画面へ
-            setTimeout(() => {
-              navigation.navigate(ROUTES.EXPLORATION_FLOW);
-            }, 300);
-            
-          } catch (navError) {
-            console.error('[Login] ナビゲーションエラー:', navError);
+          // 直接ルートを完全にリセット
+          const rootNav = navigation.getParent() || navigation;
           
-            // 最終手段: Appを再起動
-            console.log('[Login] ナビゲーション失敗、最終手段を試行');
-            alert('ログインに成功しました。アプリを再起動します。');
-          }
-        }, 500);
+          // ルートをリセットしてMAINのみを表示
+          rootNav.dispatch(
+            CommonActions.reset({
+              index: 0,
+              routes: [
+                { name: ROUTES.MAIN }
+              ],
+            })
+          );
+          
+          // 成功通知
+          console.log('[Login] メイン画面強制リセット完了');
+          
+          // 少し待ってから探索画面へ
+          setTimeout(() => {
+            navigation.navigate(ROUTES.EXPLORATION_FLOW);
+            console.log('[Login] 探索画面への遷移完了');
+          }, 800);
+        } catch (navError) {
+          console.error('[Login] 強制リセット失敗:', navError);
+          
+          // 最終手段: Appをエラーモードに
+          alert('ログインに成功しました。メイン画面に移動します。');
+          
+          // 画面移動を試す
+          navigation.navigate(ROUTES.MAIN);
+        }
       } else if (error) {
         console.log('[Login] ログインエラー:', error);
         toast.show({
