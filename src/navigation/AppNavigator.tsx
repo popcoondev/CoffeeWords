@@ -13,6 +13,9 @@ import { COLORS } from '../constants/theme';
 import MainTabNavigator from './MainTabNavigator';
 
 // スクリーン
+// スプラッシュ画面
+import SplashScreen from '../screens/SplashScreen';
+
 // 認証関連
 import OnboardingScreen from '../screens/Onboarding/OnboardingScreen';
 import ExperienceLevelScreen from '../screens/Onboarding/ExperienceLevelScreen';
@@ -61,15 +64,9 @@ const AppNavigator = () => {
 
   // 初期ルートを決定する関数
   const determineInitialRoute = () => {
-    // 強制的にメイン画面を返す - ユーザーが認証済みの場合
-    if (user) {
-      console.log('[AppNavigator] ユーザー認証済み、メイン画面に設定:', user.id);
-      return ROUTES.MAIN;
-    }
-    
-    // 認証されていない場合はオンボーディングから
-    console.log('[AppNavigator] 未認証、オンボーディング画面に設定');
-    return ROUTES.ONBOARDING;
+    // アプリ起動時は常にスプラッシュ画面から開始
+    console.log('[AppNavigator] アプリ起動時はスプラッシュ画面から開始');
+    return ROUTES.SPLASH;
   };
 
   // ルートが決定されたかを追跡する参照
@@ -130,14 +127,9 @@ const AppNavigator = () => {
     );
   }
 
-  // ロード中の場合はローディングスピナーを表示
-  if (loading || !initialized) {
-    console.log('AppNavigator: ロード中またはinitialize中、ローディング画面を表示');
-    return <LoadingScreen message={`${loading ? 'ロード中' : ''}${!initialized ? '初期化中' : ''}`} showDebug={true} />;
-  }
-
-  // 初期ルートが設定されていない場合はデフォルトを使用
-  const initialRoute = initialRouteRef.current || ROUTES.ONBOARDING;
+  // 初期ルートは常にスプラッシュ画面から始める
+  const initialRoute = ROUTES.SPLASH;
+  console.log('AppNavigator: 初期ルートをスプラッシュ画面に設定');
 
 
   try {
@@ -152,20 +144,25 @@ const AppNavigator = () => {
             const currentRouteName = navigationRef.current?.getCurrentRoute()?.name;
             console.log('[NavContainer] 状態変更: 現在のルート =', currentRouteName, '認証状態 =', !!user);
             
-            // ユーザーがログインしているのにオンボーディング/ログイン画面にいるケースを修正
+            // ユーザーがログインしているのにオンボーディング/ログイン画面/スプラッシュ画面にいるケースを修正
             if (user && 
                (currentRouteName === ROUTES.ONBOARDING || 
                 currentRouteName === ROUTES.LOGIN || 
-                currentRouteName === ROUTES.SIGNUP)) {
-              console.log('[NavContainer] 警告: 認証済みユーザーが認証前画面にいます。メイン画面に強制遷移します。');
-              
-              // 500ms後にメイン画面に強制遷移
-              setTimeout(() => {
-                navigationRef.current?.resetRoot({
-                  index: 0,
-                  routes: [{ name: ROUTES.MAIN }]
-                });
-              }, 500);
+                currentRouteName === ROUTES.SIGNUP ||
+                currentRouteName === ROUTES.SPLASH)) {
+                
+              // スプラッシュ画面はスプラッシュ画面自身で処理するので介入しない
+              if (currentRouteName !== ROUTES.SPLASH) {
+                console.log('[NavContainer] 警告: 認証済みユーザーが認証前画面にいます。メイン画面に強制遷移します。');
+                
+                // 500ms後にメイン画面に強制遷移
+                setTimeout(() => {
+                  navigationRef.current?.resetRoot({
+                    index: 0,
+                    routes: [{ name: ROUTES.MAIN }]
+                  });
+                }, 500);
+              }
             }
           }
         }}
@@ -177,6 +174,17 @@ const AppNavigator = () => {
             animation: 'slide_from_right',
           }}
         >
+          {/* スプラッシュ画面 */}
+          <Stack.Screen 
+            name={ROUTES.SPLASH} 
+            component={SplashScreen} 
+            options={{ 
+              gestureEnabled: false,
+              // スプラッシュ画面では遷移アニメーションを無効化
+              animation: 'none'
+            }}
+          />
+          
           {/* 認証関連 */}
           <Stack.Screen 
             name={ROUTES.ONBOARDING} 

@@ -1,5 +1,8 @@
 // アプリ内のルート定義
 export const ROUTES = {
+  // スプラッシュ画面
+  SPLASH: 'Splash',
+  
   // 認証関連
   ONBOARDING: 'Onboarding',
   EXPERIENCE_LEVEL: 'ExperienceLevel',

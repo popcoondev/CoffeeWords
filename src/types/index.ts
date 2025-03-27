@@ -14,6 +14,9 @@ export interface User {
 
 // ナビゲーション型定義
 export type RootStackParamList = {
+  // スプラッシュ画面
+  Splash: undefined;
+  
   // 認証関連
   Onboarding: undefined;
   ExperienceLevel: undefined;
