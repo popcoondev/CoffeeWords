@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Box, VStack, Heading, Text, FormControl, Button, HStack, Link, useToast, Icon, Pressable } from 'native-base';
 import { TextInput } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, CommonActions } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { Ionicons } from '@expo/vector-icons';
 
@@ -35,14 +35,36 @@ const LoginScreen: React.FC = () => {
     }
 
     try {
-      // 開発環境ではモック認証を使用
+      console.log('[Login] ログイン試行開始:', email);
       const success = await login(email.trim(), password);
+      
       if (success) {
-        navigation.reset({
-          index: 0,
-          routes: [{ name: ROUTES.MAIN }],
-        });
+        console.log('[Login] ログイン成功、メイン画面に遷移します');
+        
+        // メイン画面に遷移する強制的なリセット
+        try {
+          // 不要な遅延をなくして即座に実行
+          const resetAction = CommonActions.reset({
+            index: 0,
+            routes: [{ name: ROUTES.MAIN }],
+          });
+          
+          // グローバルにリセットを試みる
+          const nav = navigation.getParent() || navigation;
+          nav.dispatch(resetAction);
+          
+          console.log('[Login] 強制ナビゲーションリセット完了');
+        } catch (navError) {
+          console.error('[Login] ナビゲーションエラー:', navError);
+          
+          // フォールバック: 通常のナビゲーション
+          navigation.reset({
+            index: 0,
+            routes: [{ name: ROUTES.MAIN }],
+          });
+        }
       } else if (error) {
+        console.log('[Login] ログインエラー:', error);
         toast.show({
           title: 'ログインエラー',
           description: error,
@@ -50,10 +72,10 @@ const LoginScreen: React.FC = () => {
         });
       }
     } catch (err) {
-      console.error('ログイン処理エラー:', err);
+      console.error('[Login] ログイン処理エラー:', err);
       toast.show({
         title: 'ログインエラー',
-        description: 'ログイン処理中にエラーが発生しました。開発環境では、Firebaseが正しく設定されていない可能性があります。',
+        description: 'ログイン処理中にエラーが発生しました。FirebaseまたはFCMの初期化に問題がある可能性があります。',
         status: 'error',
       });
     }

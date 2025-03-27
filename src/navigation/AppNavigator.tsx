@@ -57,9 +57,15 @@ const AppNavigator = () => {
   const navigationRef = useRef<NavigationContainerRef<any>>(null);
   const { user, loading, initialized, error } = useAuth();
   const initialRouteRef = useRef<string | null>(null);
+  const hasSetInitialRouteRef = useRef<boolean>(false);
 
   // 初期ルートを決定する関数
   const determineInitialRoute = () => {
+    // 初期ルートが既に設定されている場合はそれを返す
+    if (hasSetInitialRouteRef.current && initialRouteRef.current) {
+      return initialRouteRef.current;
+    }
+
     if (!loading && initialized) {
       if (user) {
         // ユーザーが認証済みの場合
@@ -78,16 +84,40 @@ const AppNavigator = () => {
   // ルートが決定されたかを追跡する参照
   const routeDeterminedRef = useRef(false);
   
-  // useEffectで初期ルートを設定（依存関係が変わった時だけ実行）
+  // 初回マウント時のみ実行される初期設定
   useEffect(() => {
-    // ローディング完了後かつまだルートが決定されていない場合のみ実行
-    if (!loading && initialized && !routeDeterminedRef.current) {
-      routeDeterminedRef.current = true;
-      const route = determineInitialRoute();
-      if (route) {
-        initialRouteRef.current = route;
-        console.log('Navigation初期ルート:', route);
+    console.log('AppNavigator: 初期マウント');
+    
+    // ルート決定関数をナビゲーションレディ時のコールバックとして設定
+    const onReady = () => {
+      if (!hasSetInitialRouteRef.current) {
+        const route = determineInitialRoute();
+        if (route) {
+          initialRouteRef.current = route;
+          hasSetInitialRouteRef.current = true;
+          console.log('NavigationContainer準備完了時の初期ルート:', route);
+        }
       }
+    };
+    
+    // navigationRefが利用可能になったら設定
+    if (navigationRef.current) {
+      onReady();
+    }
+    
+    return () => {
+      console.log('AppNavigator: アンマウント');
+    };
+  }, []);
+  
+  // ユーザー状態変更時の処理（ログ記録のみ）
+  useEffect(() => {
+    if (!loading && initialized) {
+      console.log('認証状態更新:', {
+        user: user?.id || 'なし', 
+        experienceLevel: user?.experienceLevel || 'なし',
+        initialRoute: initialRouteRef.current
+      });
     }
   }, [loading, initialized, user]);
 
@@ -123,6 +153,18 @@ const AppNavigator = () => {
     return (
       <NavigationContainer
         ref={navigationRef}
+        onReady={() => {
+          // NavigationContainerの準備完了時の処理
+          console.log('NavigationContainer: 準備完了');
+          if (!hasSetInitialRouteRef.current) {
+            const route = determineInitialRoute();
+            if (route) {
+              initialRouteRef.current = route;
+              hasSetInitialRouteRef.current = true;
+              console.log('NavigationContainer準備完了時の初期ルート設定:', route);
+            }
+          }
+        }}
       >
         <Stack.Navigator 
           initialRouteName={initialRoute}

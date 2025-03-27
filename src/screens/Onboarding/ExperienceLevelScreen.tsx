@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Box, VStack, Heading, Text, ScrollView, useToast } from 'native-base';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, CommonActions } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 
 import { Button } from '../../components/ui/Button';
@@ -79,8 +79,31 @@ const ExperienceLevelScreen: React.FC = () => {
         }
       }
       
-      // メイン画面に遷移
-      navigation.navigate(ROUTES.MAIN);
+      // メイン画面に遷移（ナビゲーションをリセットして履歴をクリア）
+      console.log('[ExperienceLevel] 経験レベル設定完了、メイン画面に遷移します');
+      
+      // メイン画面への強制的なリセット
+      try {
+        // 不要な遅延をなくして即座に実行
+        const resetAction = CommonActions.reset({
+          index: 0,
+          routes: [{ name: ROUTES.MAIN }],
+        });
+        
+        // グローバルにリセットを試みる
+        const nav = navigation.getParent() || navigation;
+        nav.dispatch(resetAction);
+        
+        console.log('[ExperienceLevel] 強制ナビゲーションリセット完了');
+      } catch (navError) {
+        console.error('[ExperienceLevel] ナビゲーションエラー:', navError);
+        
+        // フォールバック: 通常のナビゲーション
+        navigation.reset({
+          index: 0,
+          routes: [{ name: ROUTES.MAIN }],
+        });
+      }
     } catch (error) {
       console.error("Error saving experience level:", error);
       toast.show({

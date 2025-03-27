@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Box, VStack, Heading, Text, FormControl, Button, HStack, Link, useToast, Icon, Pressable } from 'native-base';
 import { TextInput } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, CommonActions } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { Ionicons } from '@expo/vector-icons';
 
@@ -75,8 +75,30 @@ const SignupScreen: React.FC = () => {
       // サインアップ処理
       const success = await register(email.trim(), password, name.trim());
       if (success) {
-        // サインアップ成功、体験レベル選択へ
-        navigation.navigate(ROUTES.EXPERIENCE_LEVEL);
+        console.log('[Signup] サインアップ成功、体験レベル選択へ');
+        
+        // 体験レベル選択画面に遷移する強制的なリセット
+        try {
+          // 不要な遅延をなくして即座に実行
+          const resetAction = CommonActions.reset({
+            index: 0,
+            routes: [{ name: ROUTES.EXPERIENCE_LEVEL }],
+          });
+          
+          // グローバルにリセットを試みる
+          const nav = navigation.getParent() || navigation;
+          nav.dispatch(resetAction);
+          
+          console.log('[Signup] 強制ナビゲーションリセット完了');
+        } catch (navError) {
+          console.error('[Signup] ナビゲーションエラー:', navError);
+          
+          // フォールバック: 通常のナビゲーション
+          navigation.reset({
+            index: 0,
+            routes: [{ name: ROUTES.EXPERIENCE_LEVEL }],
+          });
+        }
       } else if (error) {
         toast.show({
           title: '登録エラー',
