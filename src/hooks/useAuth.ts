@@ -76,6 +76,23 @@ export const useAuth = () => {
     }
   }, [getUser, setUserDoc]);
 
+  // モック認証モードかどうかを確認
+  const isMockAuthMode = () => {
+    return (global as any).__FIREBASE_MOCK_MODE__ === true;
+  };
+
+  // 開発環境用のモックユーザーを作成
+  const createMockUser = useCallback((): User => {
+    const mockUserId = 'mock-user-' + Math.random().toString(36).substring(2, 9);
+    return {
+      id: mockUserId,
+      email: 'mock@example.com',
+      displayName: 'モックユーザー',
+      createdAt: new Date(),
+      experienceLevel: 'beginner',
+    };
+  }, []);
+
   // 認証状態の監視
   useEffect(() => {
     // 安全のため3秒後にローディング状態を強制解除するタイマーを設定
@@ -91,7 +108,36 @@ export const useAuth = () => {
     console.log('useAuth: 認証状態の監視を開始');
     
     try {
-      // Firebase設定のデバッグ情報
+      // モックモードの場合はダミーユーザーを返す
+      if (isMockAuthMode()) {
+        console.log('useAuth: モック認証モードが有効です');
+
+        // 開発環境ではモックユーザーを自動的に作成
+        if (__DEV__) {
+          const mockUser = createMockUser();
+          console.log('useAuth: モックユーザーを作成しました', mockUser.id);
+          
+          // モック認証ユーザーを設定
+          const mockFbUser = {
+            uid: mockUser.id,
+            email: mockUser.email,
+            displayName: mockUser.displayName,
+            emailVerified: true,
+          } as FirebaseUser;
+          
+          setFirebaseUser(mockFbUser);
+          setUser(mockUser);
+        } else {
+          setFirebaseUser(null);
+          setUser(null);
+        }
+        
+        setLoading(false);
+        setInitialized(true);
+        return () => clearTimeout(safetyTimer);
+      }
+
+      // 通常のFirebase認証モード
       console.log('Firebase auth object exists:', !!auth);
       
       // コールバックを強制的に一度だけ実行するため、手動でメソッドを呼び出す
@@ -152,7 +198,7 @@ export const useAuth = () => {
         clearTimeout(safetyTimer);
       };
     }
-  }, []);
+  }, [createMockUser]);
 
   /**
    * メール/パスワードでのサインアップ
@@ -166,7 +212,34 @@ export const useAuth = () => {
       setLoading(true);
       setError(null);
       
-      // Firebase Authでユーザー作成
+      // モックモードの場合
+      if (isMockAuthMode()) {
+        console.log('[Auth Mock] サインアップ処理:', email, displayName);
+        
+        // モックユーザー作成
+        const mockUser: User = {
+          id: 'mock-user-' + Math.random().toString(36).substring(2, 9),
+          email,
+          displayName,
+          createdAt: new Date(),
+          experienceLevel: 'beginner',
+        };
+        
+        // モック認証ユーザーを設定
+        const mockFbUser = {
+          uid: mockUser.id,
+          email: mockUser.email,
+          displayName: mockUser.displayName,
+          emailVerified: true,
+        } as FirebaseUser;
+        
+        setFirebaseUser(mockFbUser);
+        setUser(mockUser);
+        
+        return true;
+      }
+      
+      // 実際のFirebase Authでユーザー作成
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       const fbUser = userCredential.user;
       
@@ -224,6 +297,34 @@ export const useAuth = () => {
       setLoading(true);
       setError(null);
       
+      // モックモードの場合
+      if (isMockAuthMode()) {
+        console.log('[Auth Mock] ログイン処理:', email);
+        
+        // モックユーザー作成
+        const mockUser: User = {
+          id: 'mock-user-' + Math.random().toString(36).substring(2, 9),
+          email,
+          displayName: email.split('@')[0],
+          createdAt: new Date(),
+          experienceLevel: 'beginner',
+        };
+        
+        // モック認証ユーザーを設定
+        const mockFbUser = {
+          uid: mockUser.id,
+          email: mockUser.email,
+          displayName: mockUser.displayName,
+          emailVerified: true,
+        } as FirebaseUser;
+        
+        setFirebaseUser(mockFbUser);
+        setUser(mockUser);
+        
+        return true;
+      }
+      
+      // 実際のFirebase Authでログイン
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
       const fbUser = userCredential.user;
       setFirebaseUser(fbUser);
@@ -259,6 +360,15 @@ export const useAuth = () => {
   const logout = useCallback(async (): Promise<boolean> => {
     try {
       setLoading(true);
+      
+      // モックモードの場合
+      if (isMockAuthMode()) {
+        console.log('[Auth Mock] ログアウト処理');
+        storeSignOut();
+        return true;
+      }
+      
+      // 実際のFirebase Authでログアウト
       await firebaseSignOut(auth);
       storeSignOut();
       return true;

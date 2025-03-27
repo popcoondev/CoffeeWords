@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import { Box, VStack, Heading, Text, HStack, Pressable, Icon, ScrollView, Divider } from 'native-base';
+import { Box, VStack, Heading, Text, HStack, Pressable, Icon, ScrollView, Divider, useToast } from 'native-base';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { Ionicons } from '@expo/vector-icons';
-import { Dimensions } from 'react-native';
+import { Dimensions, Alert } from 'react-native';
 import Svg, { Polygon, Circle, Line, Text as SvgText } from 'react-native-svg';
 
 import { Card } from '../../components/ui/Card';
@@ -47,6 +47,12 @@ const PreferenceScreen: React.FC = () => {
   const chartSize = windowWidth - 80; // パディングを考慮
   const chartCenter = chartSize / 2;
   const chartRadius = chartSize * 0.4;
+  const toast = useToast();
+  
+  // Firebase認証モードの状態
+  const [firebaseMode, setFirebaseMode] = useState<'mock' | 'production'>(
+    (global as any).__FIREBASE_REAL_MODE__ ? 'production' : 'mock'
+  );
   
   // OpenAI API設定の状態確認
   const { hasKey, checkApiKey } = useLanguageGeneration();
@@ -85,6 +91,49 @@ const PreferenceScreen: React.FC = () => {
   const handleOpenApiSettings = () => {
     // APIキー設定画面に遷移
     navigation.navigate(ROUTES.API_KEY_SETTINGS);
+  };
+  
+  // Firebase認証モードの切り替え
+  const toggleFirebaseMode = () => {
+    // 現在と逆のモードを設定
+    const newMode = firebaseMode === 'mock' ? 'production' : 'mock';
+    
+    // ユーザーに確認
+    Alert.alert(
+      'Firebase認証モードの切り替え',
+      `${newMode === 'production' ? '本番' : 'モック'}モードに切り替えますか？\n\n` +
+      `※切り替え後はアプリを再起動する必要があります`,
+      [
+        {
+          text: 'キャンセル',
+          style: 'cancel'
+        },
+        {
+          text: '切り替える',
+          onPress: () => {
+            // グローバル変数を更新
+            (global as any).__FIREBASE_MODE__ = newMode;
+            (global as any).__FIREBASE_MOCK_MODE__ = newMode === 'mock';
+            (global as any).__FIREBASE_REAL_MODE__ = newMode === 'production';
+            
+            // 状態を更新
+            setFirebaseMode(newMode);
+            
+            // ログアウト状態にリセット（モード切替時は認証状態をクリア）
+            logout().then(() => {
+              // 通知表示
+              toast.show({
+                title: 'モードを切り替えました',
+                description: 'アプリを再起動してください',
+                status: 'info',
+                duration: 5000,
+                isClosable: true,
+              });
+            });
+          }
+        }
+      ]
+    );
   };
 
   // レーダーチャートのポリゴン座標を計算
@@ -299,6 +348,7 @@ const PreferenceScreen: React.FC = () => {
           <Heading size="md">アプリ設定</Heading>
           <Card>
             <VStack space={3}>
+              {/* OpenAI API設定 */}
               <Pressable onPress={handleOpenApiSettings}>
                 <HStack alignItems="center" justifyContent="space-between" py={2}>
                   <HStack space={3} alignItems="center">
@@ -325,6 +375,37 @@ const PreferenceScreen: React.FC = () => {
                   />
                 </HStack>
               </Pressable>
+              
+              {/* Firebase認証モード設定 */}
+              {__DEV__ && (
+                <Pressable onPress={toggleFirebaseMode}>
+                  <HStack alignItems="center" justifyContent="space-between" py={2}>
+                    <HStack space={3} alignItems="center">
+                      <Icon
+                        as={Ionicons}
+                        name="cloud-outline"
+                        size="sm"
+                        color={COLORS.primary[500]}
+                      />
+                      <VStack>
+                        <Text fontWeight="medium">Firebase認証モード</Text>
+                        <Text 
+                          fontSize="xs" 
+                          color={firebaseMode === 'production' ? COLORS.semantic.success : COLORS.semantic.warning}
+                        >
+                          {firebaseMode === 'production' ? "本番モード" : "モックモード"}
+                        </Text>
+                      </VStack>
+                    </HStack>
+                    <Icon
+                      as={Ionicons}
+                      name="swap-horizontal-outline"
+                      size="sm"
+                      color={COLORS.text.light}
+                    />
+                  </HStack>
+                </Pressable>
+              )}
             </VStack>
           </Card>
         </VStack>

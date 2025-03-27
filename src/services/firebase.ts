@@ -28,21 +28,53 @@ const firebaseConfig = {
   measurementId: FIREBASE_MEASUREMENT_ID
 };
 
+// Firebaseモードの設定
+// FIREBASE_MODE環境変数を取得 (まず @env から、なければ process.env から)
+const envFirebaseMode = typeof FIREBASE_MODE !== 'undefined' ? FIREBASE_MODE : process.env.FIREBASE_MODE;
+// 環境変数で設定されていない場合は、開発環境ではモック、本番環境では実モードをデフォルトに
+const firebaseMode = envFirebaseMode || (__DEV__ ? 'mock' : 'production');
+
+// 設定をグローバル変数に保存
+(global as any).__FIREBASE_MODE__ = firebaseMode;
+(global as any).__FIREBASE_MOCK_MODE__ = firebaseMode === 'mock';
+(global as any).__FIREBASE_REAL_MODE__ = firebaseMode === 'production';
+
+// モードに応じたログ出力
+if (firebaseMode === 'mock') {
+  console.warn('FirebaseモックモードでAPIを実行します。実際のFirebase操作はシミュレートされます。');
+} else if (firebaseMode === 'production') {
+  console.log('Firebase本番モードでAPIを実行します。実際のFirebaseサービスに接続します。');
+} else {
+  console.warn(`不明なFirebaseモード「${firebaseMode}」です。'mock'または'production'を指定してください。`);
+  // デフォルトはモックモード
+  (global as any).__FIREBASE_MOCK_MODE__ = true;
+  (global as any).__FIREBASE_REAL_MODE__ = false;
+}
+
 // 設定値が存在するかチェック (少なくともapiKeyとprojectIdは必須)
-if (!firebaseConfig.apiKey || !firebaseConfig.projectId) {
-  console.error(
+const isConfigIncomplete = !firebaseConfig.apiKey || !firebaseConfig.projectId;
+
+if (isConfigIncomplete) {
+  console.warn(
     'Firebase設定が不完全です。環境変数が正しく設定されているか確認してください。\n' +
     '詳細: https://firebase.google.com/docs/web/setup'
   );
-  // 開発環境の場合はダミー値を設定してクラッシュを防止
-  if (__DEV__) {
-    console.warn('開発環境でのみ、ダミーの設定値を使用してアプリ起動を続行します');
+
+  // モードに応じた処理
+  if ((global as any).__FIREBASE_MOCK_MODE__) {
+    // モックモードではダミー値を設定
     if (!firebaseConfig.apiKey) firebaseConfig.apiKey = 'DUMMY_API_KEY_FOR_DEV';
     if (!firebaseConfig.authDomain) firebaseConfig.authDomain = 'dummy-app.firebaseapp.com';
     if (!firebaseConfig.projectId) firebaseConfig.projectId = 'dummy-project-id';
     if (!firebaseConfig.storageBucket) firebaseConfig.storageBucket = 'dummy-app.appspot.com';
     if (!firebaseConfig.messagingSenderId) firebaseConfig.messagingSenderId = '000000000000';
     if (!firebaseConfig.appId) firebaseConfig.appId = '1:000000000000:web:0000000000000000000000';
+  } else if ((global as any).__FIREBASE_REAL_MODE__) {
+    // 本番モードなのに設定が不足している場合は明確なエラーを表示
+    console.error(
+      '本番モードでFirebase設定が不完全です。環境変数が正しく設定されているか確認してください。' +
+      'モックモードに戻すには設定画面で切り替えるか、FIREBASE_MODE=mock を設定してください。'
+    );
   }
 }
 

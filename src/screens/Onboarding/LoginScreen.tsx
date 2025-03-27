@@ -20,6 +20,9 @@ const LoginScreen: React.FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  
+  // 現在のFirebaseモードを取得
+  const firebaseMode = (global as any).__FIREBASE_REAL_MODE__ ? 'production' : 'mock';
 
   const handleLogin = async () => {
     if (!email.trim() || !password.trim()) {
@@ -32,16 +35,7 @@ const LoginScreen: React.FC = () => {
     }
 
     try {
-      // 開発環境ではメール/パスワード認証をバイパスする
-      if (__DEV__) {
-        console.log('開発環境: 認証バイパス');
-        navigation.reset({
-          index: 0,
-          routes: [{ name: ROUTES.MAIN }],
-        });
-        return;
-      }
-      
+      // 開発環境ではモック認証を使用
       const success = await login(email.trim(), password);
       if (success) {
         navigation.reset({
@@ -83,6 +77,9 @@ const LoginScreen: React.FC = () => {
           </Heading>
           <Text fontSize="md" color={COLORS.text.secondary} textAlign="center">
             あなたのコーヒー体験を言葉にする
+          </Text>
+          <Text fontSize="xs" color={firebaseMode === 'production' ? COLORS.semantic.success : COLORS.semantic.warning} textAlign="center" mt={1}>
+            {firebaseMode === 'production' ? '本番認証モード' : 'モック認証モード'}
           </Text>
         </Box>
 
