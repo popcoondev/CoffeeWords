@@ -39,4 +39,10 @@ export const ROUTES = {
   // 設定やプロフィール
   SETTINGS: 'Settings',
   API_KEY_SETTINGS: 'ApiKeySettings',
+  
+  // 旧コーヒー記録フロー (後方互換性のため)
+  COFFEE_RECORD_FLOW: 'CoffeeRecordFlow',
+  COFFEE_RECORD_INFO: 'CoffeeRecordInfo',
+  COFFEE_RECORD_TASTE: 'CoffeeRecordTaste',
+  COFFEE_RECORD_RESULT: 'CoffeeRecordResult',
 };
