@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { ScrollView, RefreshControl } from 'react-native';
-import { Box, VStack, Heading, Text, HStack, Pressable, Icon, Input, useToast, Button } from 'native-base';
+import { ScrollView, RefreshControl, TextInput } from 'react-native';
+import { Box, VStack, Heading, Text, HStack, Pressable, Icon, useToast, Button } from 'native-base';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 
@@ -218,9 +218,9 @@ const TranslationDictionaryScreen: React.FC = () => {
     <ScrollView
       flex={1}
       bg={COLORS.background.primary}
-      px={4}
-      pt={2}
-      pb={6}
+      px={6}
+      pt={4}
+      pb={8}
       refreshControl={
         <RefreshControl
           refreshing={refreshing}
@@ -232,28 +232,35 @@ const TranslationDictionaryScreen: React.FC = () => {
     >
       <VStack space={6}>
         {/* 検索バー */}
-        <Input
-          placeholder="用語を検索..."
-          value={searchQuery}
-          onChangeText={setSearchQuery}
+        <Box
           width="100%"
           borderRadius="lg"
-          py={3}
-          px={4}
-          fontSize="md"
           bg="white"
           borderWidth={1}
           borderColor={COLORS.background.secondary}
-          InputLeftElement={
-            <Icon
-              as={Ionicons}
-              name="search"
-              size={5}
-              ml={2}
-              color={COLORS.text.light}
-            />
-          }
-        />
+          flexDirection="row"
+          alignItems="center"
+          px={3}
+        >
+          <Icon
+            as={Ionicons}
+            name="search"
+            size={5}
+            color={COLORS.text.light}
+            mr={2}
+          />
+          <TextInput
+            placeholder="用語を検索..."
+            value={searchQuery}
+            onChangeText={setSearchQuery}
+            style={{
+              flex: 1,
+              paddingVertical: 12,
+              fontSize: 16,
+              color: COLORS.text.primary
+            }}
+          />
+        </Box>
         
         {/* カテゴリフィルター */}
         <ScrollView horizontal showsHorizontalScrollIndicator={false}>
@@ -427,8 +434,8 @@ const TranslationDictionaryScreen: React.FC = () => {
               {title}
             </Text>
           </HStack>
-          <Box px={2} py={0.5} bg={COLORS.primary[100]} rounded="md">
-            <Text fontSize="xs" color={COLORS.primary[800]}>
+          <Box px={2} py={0.5} bg={COLORS.primary[500] + '33'} rounded="md">
+            <Text fontSize="xs" color={COLORS.primary[500]}>
               {items.length}
             </Text>
           </Box>
@@ -453,13 +460,13 @@ const TranslationDictionaryScreen: React.FC = () => {
                       bg={getCategoryColor(term.category)}
                       rounded="sm"
                     >
-                      <Text fontSize="2xs" color="white">
+                      <Text fontSize="xs" color="white">
                         {translateCategory(term.category)}
                       </Text>
                     </Box>
                     {term.discoveryCount > 1 && (
                       <Box px={1} py={0} rounded="sm">
-                        <Text fontSize="2xs" color={COLORS.text.secondary}>
+                        <Text fontSize="xs" color={COLORS.text.secondary}>
                           {term.discoveryCount}回発見
                         </Text>
                       </Box>

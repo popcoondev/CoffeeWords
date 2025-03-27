@@ -87,12 +87,24 @@ export const getUserExplorations = async (
   try {
     const { limit: limitCount = 10, offset = 0 } = options;
     
-    const q = query(
-      collection(db, COLLECTION_NAME),
-      where('userId', '==', userId),
-      orderBy('createdAt', 'desc'),
-      limit(limitCount)
-    );
+    let q;
+    
+    if (__DEV__) {
+      // 開発環境では最低限のクエリ
+      q = query(
+        collection(db, COLLECTION_NAME),
+        where('userId', '==', userId),
+        limit(limitCount)
+      );
+    } else {
+      // 本番環境では完全なクエリ
+      q = query(
+        collection(db, COLLECTION_NAME),
+        where('userId', '==', userId),
+        orderBy('createdAt', 'desc'),
+        limit(limitCount)
+      );
+    }
     
     const querySnapshot = await getDocs(q);
     const explorations: CoffeeExploration[] = [];

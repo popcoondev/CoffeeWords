@@ -53,16 +53,109 @@ const TasteMapScreen: React.FC = () => {
     try {
       setLoading(true);
       
-      // 探検記録の取得
-      const userExplorations = await getUserExplorations(user.id, { limit: 20 });
-      setExplorations(userExplorations);
-      
-      // 好みのサマリーを計算
-      calculatePreferenceSummary(userExplorations);
-      
-      // 探検領域のカバレッジを計算（仮実装）
-      const coverage = Math.min(100, userExplorations.length * 5);
-      setExplorationCoverage(coverage);
+      if (__DEV__) {
+        // 開発環境ではモックデータを利用
+        console.log('開発環境: モックデータを使用');
+        
+        // モックの探検データ
+        const mockExplorations: CoffeeExploration[] = [
+          {
+            id: 'mock-exploration-1',
+            userId: user.id || 'mock-user',
+            createdAt: new Date(),
+            coffeeInfo: {
+              name: 'エチオピア イルガチェフェ',
+              roaster: 'モックロースター',
+              origin: 'エチオピア'
+            },
+            tasteMapPosition: { x: 150, y: 200 },
+            preferences: {
+              overallRating: 4,
+              likedPoints: ['フルーティー', '明るい酸味'],
+              wouldDrinkAgain: 4,
+              drinkingScene: ['朝']
+            },
+            analysis: {
+              professionalDescription: 'フローラルな香りとベリーのような風味を持つ明るい酸味のコーヒー',
+              personalTranslation: '花の香りがあり、さわやかな酸味が特徴的',
+              tasteProfile: {
+                acidity: 4,
+                sweetness: 3,
+                bitterness: 2,
+                body: 2,
+                complexity: 4
+              },
+              preferenceInsight: 'あなたは明るい酸味を好む傾向があります',
+              discoveredFlavor: {
+                name: 'ベリー系フルーツの酸味',
+                category: 'acidity',
+                description: 'ブルーベリーやラズベリーを連想させる甘酸っぱさ',
+                rarity: 3,
+                userInterpretation: 'フルーツジュースのような爽やかさ'
+              },
+              nextExploration: 'ケニア産のコーヒーも試してみると良いでしょう'
+            }
+          },
+          {
+            id: 'mock-exploration-2',
+            userId: user.id || 'mock-user',
+            createdAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000),
+            coffeeInfo: {
+              name: 'ブラジル サントス',
+              roaster: 'モックロースター',
+              origin: 'ブラジル'
+            },
+            tasteMapPosition: { x: 250, y: 300 },
+            preferences: {
+              overallRating: 3,
+              likedPoints: ['コク', 'チョコレート感'],
+              wouldDrinkAgain: 3,
+              drinkingScene: ['午後']
+            },
+            analysis: {
+              professionalDescription: 'ナッツとチョコレート風味の低めの酸味とコクのあるバランスの取れたコーヒー',
+              personalTranslation: 'ナッツのような香ばしさとチョコレートのような甘さを感じる',
+              tasteProfile: {
+                acidity: 2,
+                sweetness: 3,
+                bitterness: 3,
+                body: 4,
+                complexity: 3
+              },
+              preferenceInsight: 'コクのあるコーヒーも楽しめる傾向があります',
+              discoveredFlavor: {
+                name: 'ナッツの香ばしさ',
+                category: 'aroma',
+                description: 'アーモンドやヘーゼルナッツを連想させる香ばしさ',
+                rarity: 2,
+                userInterpretation: '香ばしいクッキーのような香り'
+              },
+              nextExploration: 'コロンビア産のコーヒーも試してみると良いでしょう'
+            }
+          }
+        ];
+        
+        setExplorations(mockExplorations);
+        
+        // 好みのサマリーを計算
+        calculatePreferenceSummary(mockExplorations);
+        
+        // 探検領域のカバレッジを計算（仮実装）
+        const coverage = Math.min(100, mockExplorations.length * 10);
+        setExplorationCoverage(coverage);
+        
+      } else {
+        // 本番環境では実際のデータを取得
+        const userExplorations = await getUserExplorations(user.id, { limit: 20 });
+        setExplorations(userExplorations);
+        
+        // 好みのサマリーを計算
+        calculatePreferenceSummary(userExplorations);
+        
+        // 探検領域のカバレッジを計算（仮実装）
+        const coverage = Math.min(100, userExplorations.length * 5);
+        setExplorationCoverage(coverage);
+      }
       
     } catch (error) {
       console.error('Error fetching user data:', error);
@@ -133,9 +226,9 @@ const TasteMapScreen: React.FC = () => {
     <ScrollView
       flex={1}
       bg={COLORS.background.primary}
-      px={4}
-      pt={2}
-      pb={6}
+      px={6}
+      pt={4}
+      pb={8}
       refreshControl={
         <RefreshControl
           refreshing={refreshing}

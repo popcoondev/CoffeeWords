@@ -118,15 +118,27 @@ export const getUserActiveMissions = async (
     // 現在の日時
     const now = new Date();
     
-    // アクティブで期限内のミッションを取得
-    const q = query(
-      collection(db, COLLECTION_NAME),
-      where('userId', '==', userId),
-      where('status', '==', 'active'),
-      where('expiresAt', '>=', now),
-      orderBy('expiresAt', 'asc'),
-      limit(limitCount)
-    );
+    // クエリを作成（開発環境では簡略化）
+    let q;
+    
+    if (__DEV__) {
+      // 開発環境では単純にユーザーIDのみでクエリ
+      q = query(
+        collection(db, COLLECTION_NAME),
+        where('userId', '==', userId),
+        limit(limitCount)
+      );
+    } else {
+      // 本番環境ではアクティブで期限内のミッションを取得
+      q = query(
+        collection(db, COLLECTION_NAME),
+        where('userId', '==', userId),
+        where('status', '==', 'active'),
+        where('expiresAt', '>=', now),
+        orderBy('expiresAt', 'asc'),
+        limit(limitCount)
+      );
+    }
     
     const querySnapshot = await getDocs(q);
     const missions: Mission[] = [];

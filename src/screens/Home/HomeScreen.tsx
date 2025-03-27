@@ -56,15 +56,87 @@ const HomeScreen: React.FC = () => {
     try {
       setLoading(true);
       
-      // 並列でデータを取得
-      const [explorations, missions] = await Promise.all([
-        getUserExplorations(user.id, { limit: 3 }),
-        getUserActiveMissions(user.id, { limit: 3 })
-      ]);
-      
-      setRecentExplorations(explorations);
-      setActiveMissions(missions);
-      
+      if (__DEV__) {
+        // 開発環境ではモックデータを利用
+        console.log('開発環境: モックデータを使用');
+        
+        // モックの探検データ
+        const mockExplorations: CoffeeExploration[] = [
+          {
+            id: 'mock-exploration-1',
+            userId: user.id || 'mock-user',
+            createdAt: new Date(),
+            coffeeInfo: {
+              name: 'エチオピア イルガチェフェ',
+              roaster: 'モックロースター',
+              origin: 'エチオピア'
+            },
+            tasteMapPosition: { x: 150, y: 200 },
+            preferences: {
+              overallRating: 4,
+              likedPoints: ['フルーティー', '明るい酸味'],
+              wouldDrinkAgain: 4,
+              drinkingScene: ['朝']
+            },
+            analysis: {
+              professionalDescription: 'フローラルな香りとベリーのような風味を持つ明るい酸味のコーヒー',
+              personalTranslation: '花の香りがあり、さわやかな酸味が特徴的',
+              tasteProfile: {
+                acidity: 4,
+                sweetness: 3,
+                bitterness: 2,
+                body: 2,
+                complexity: 4
+              },
+              preferenceInsight: 'あなたは明るい酸味を好む傾向があります',
+              discoveredFlavor: {
+                name: 'ベリー系フルーツの酸味',
+                category: 'acidity',
+                description: 'ブルーベリーやラズベリーを連想させる甘酸っぱさ',
+                rarity: 3,
+                userInterpretation: 'フルーツジュースのような爽やかさ'
+              },
+              nextExploration: 'ケニア産のコーヒーも試してみると良いでしょう'
+            }
+          }
+        ];
+        
+        // モックのミッションデータ
+        const mockMissions: Mission[] = [
+          {
+            id: 'mock-mission-1',
+            userId: user.id || 'mock-user',
+            createdAt: new Date(),
+            expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+            title: '酸味と甘みのバランスを探す',
+            description: '酸味と甘みのバランスが良いコーヒーを見つけて記録しましょう',
+            difficulty: 'beginner',
+            type: 'discovery',
+            objectives: {
+              targetFlavorCategory: 'acidity',
+              specificTask: '酸味と甘みのバランスが取れたコーヒーを探す'
+            },
+            status: 'active',
+            reward: {
+              experiencePoints: 10
+            },
+            relatedCoffeeRecommendations: ['エチオピア イルガチェフェ', 'グアテマラ アンティグア'],
+            helpTips: ['浅煎りのコーヒーを探してみましょう', '準備中の豆を確認してみましょう']
+          }
+        ];
+        
+        setRecentExplorations(mockExplorations);
+        setActiveMissions(mockMissions);
+      } else {
+        // 本番環境では実際のデータを取得
+        const [explorations, missions] = await Promise.all([
+          getUserExplorations(user.id, { limit: 3 }),
+          getUserActiveMissions(user.id, { limit: 3 })
+        ]);
+        
+        setRecentExplorations(explorations);
+        setActiveMissions(missions);
+      }
     } catch (error) {
       console.error('Error fetching user data:', error);
       toast.show({
@@ -113,9 +185,9 @@ const HomeScreen: React.FC = () => {
     <ScrollView
       flex={1}
       bg={COLORS.background.primary}
-      px={4}
-      pt={2}
-      pb={6}
+      px={6}
+      pt={4}
+      pb={8}
       refreshControl={
         <RefreshControl
           refreshing={refreshing}
@@ -271,7 +343,7 @@ const HomeScreen: React.FC = () => {
                       <VStack flex={1}>
                         <Text fontWeight="bold">{exploration.coffeeInfo.name}</Text>
                         <Text numberOfLines={1} fontSize="xs" color={COLORS.text.secondary}>
-                          {exploration.analysis.shortDescription}
+                          {exploration.analysis.personalTranslation}
                         </Text>
                       </VStack>
                       <Icon 
