@@ -47,7 +47,8 @@ const TasteMap: React.FC<TasteMapProps> = ({
     if (onPositionChange) {
       onPositionChange(position, extracted);
     }
-  }, [position, onPositionChange]);
+    // onPositionChangeを依存配列から削除して無限ループを防止
+  }, [position]);
   
   // タップ位置の更新
   const handlePress = (event: GestureResponderEvent) => {

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { ScrollView } from 'react-native';
 import { Box, VStack, Heading, Text, Button, HStack, Icon, Pressable, useToast } from 'native-base';
 import { useNavigation, useRoute } from '@react-navigation/native';
@@ -43,10 +43,10 @@ const ExplorationTasteMapScreen: React.FC = () => {
     navigation.goBack();
   };
   
-  // マップ位置変更ハンドラー
-  const handlePositionChange = (position: any, characteristics: any) => {
+  // マップ位置変更ハンドラー（useCallbackでメモ化して再レンダリングを最適化）
+  const handlePositionChange = useCallback((position: any, characteristics: any) => {
     setMapPosition(position, characteristics);
-  };
+  }, [setMapPosition]);
   
   // 次へボタン
   const handleNext = () => {
