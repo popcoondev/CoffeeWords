@@ -44,7 +44,8 @@ const ExplorationResultScreen: React.FC = () => {
     if (isDecoding && !decodeResult) {
       const interval = setInterval(() => {
         setProgress(prev => {
-          const newProgress = prev + (Math.random() * 5);
+          // 浮動小数点数を整数に変換して精度の問題を解消
+          const newProgress = Math.floor(prev + (Math.random() * 5));
           return newProgress > 95 ? 95 : newProgress;
         });
       }, 300);
@@ -164,7 +165,7 @@ const ExplorationResultScreen: React.FC = () => {
             コーヒーを解読中...
           </Heading>
           <Box w="full">
-            <Progress value={progress} colorScheme="amber" size="lg" mb={4} />
+            <Progress value={Math.floor(progress)} colorScheme="amber" size="lg" mb={4} />
             <HStack justifyContent="space-between">
               <Text fontSize="xs" color={COLORS.text.light}>データ収集</Text>
               <Text fontSize="xs" color={COLORS.text.light}>言語化</Text>
@@ -241,7 +242,7 @@ const ExplorationResultScreen: React.FC = () => {
                         {value}/5
                       </Text>
                     </HStack>
-                    <Progress value={value * 20} colorScheme="amber" size="xs" />
+                    <Progress value={Math.floor(value * 20)} colorScheme="amber" size="xs" />
                   </VStack>
                 ))}
               </VStack>
