@@ -38,6 +38,7 @@ export const ROUTES = {
   
   // 設定やプロフィール
   SETTINGS: 'Settings',
+  PREFERENCE: 'Preference',
   API_KEY_SETTINGS: 'ApiKeySettings',
   
   // 旧コーヒー記録フロー (後方互換性のため)

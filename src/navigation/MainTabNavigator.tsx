@@ -9,20 +9,22 @@ import { COLORS } from '../constants/theme';
 // スクリーン
 import HomeScreen from '../screens/Home/HomeScreen';
 import TranslationDictionaryScreen from '../screens/Translation/TranslationDictionaryScreen';
-import TasteMapScreen from '../screens/TasteMap/TasteMapScreen'; // 新しい画面
+import TasteMapScreen from '../screens/TasteMap/TasteMapScreen';
+import PreferenceScreen from '../screens/Preference/PreferenceScreen';
 
 // @ts-ignore - React Navigation v7との互換性のため
 const Tab = createBottomTabNavigator();
 
 /**
  * メイン画面のタブナビゲーター
- * ホーム、翻訳辞書、味わい探検マップの3つのタブ画面を含む
+ * ホーム、翻訳辞書、味わい探検マップ、設定の4つのタブ画面を含む
  */
 // タブナビゲーター用に固定のルート名を定義
 const TAB_ROUTES = {
   HOME: ROUTES.HOME,
   DICTIONARY: ROUTES.TRANSLATION_DICTIONARY,
-  TASTE_MAP: ROUTES.TASTE_MAP
+  TASTE_MAP: ROUTES.TASTE_MAP,
+  PREFERENCE: ROUTES.PREFERENCE
 };
 
 const MainTabNavigator = () => {
@@ -62,6 +64,8 @@ const MainTabNavigator = () => {
             iconName = isFocused ? 'book' : 'book-outline';
           } else if (route.name === TAB_ROUTES.TASTE_MAP) {
             iconName = isFocused ? 'map' : 'map-outline';
+          } else if (route.name === TAB_ROUTES.PREFERENCE) {
+            iconName = isFocused ? 'settings' : 'settings-outline';
           }
 
           const onPress = () => {
@@ -146,6 +150,11 @@ const MainTabNavigator = () => {
         name={TAB_ROUTES.TASTE_MAP} 
         component={TasteMapScreen} 
         options={{ title: '味わい探検マップ' }}
+      />
+      <Tab.Screen 
+        name={TAB_ROUTES.PREFERENCE} 
+        component={PreferenceScreen} 
+        options={{ title: '設定' }}
       />
     </Tab.Navigator>
   );
