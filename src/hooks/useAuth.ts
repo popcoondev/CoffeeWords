@@ -84,7 +84,7 @@ export const useAuth = () => {
       console.log('useAuth: モックモード設定値:', (global as any).__FIREBASE_MOCK_MODE__);
       return (global as any).__FIREBASE_MOCK_MODE__;
     }
-    // 設定されていなければ本番モード
+    // 設定されていなければ常に本番モード
     console.log('useAuth: デフォルトモード設定 (本番)');
     return false;
   };
@@ -124,15 +124,13 @@ export const useAuth = () => {
       setInitialized(true);
     }, 5000);
     
-    // 現在のモードを確認 - ローカル関数として定義して依存関係を減らす
-    const checkMockMode = () => {
-      if (typeof (global as any).__FIREBASE_MOCK_MODE__ === 'boolean') {
-        return (global as any).__FIREBASE_MOCK_MODE__;
-      }
-      return false; // デフォルトは本番モード
-    };
+    // 常に本番モードを使用することを強制
+    console.log('[Auth] 認証モードを本番に強制設定');
+    (global as any).__FIREBASE_MOCK_MODE__ = false;
+    (global as any).__FIREBASE_REAL_MODE__ = true;
+    (global as any).__FIREBASE_MODE__ = 'production';
     
-    const mockMode = checkMockMode();
+    const mockMode = false; // 常に本番モード
     console.log(`[Auth] 現在の認証モード: ${mockMode ? 'モック' : '本番'}`);
     
     // モックモードの場合はすぐに初期化完了

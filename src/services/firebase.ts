@@ -36,34 +36,22 @@ const firebaseConfig = {
   measurementId: FIREBASE_MEASUREMENT_ID
 };
 
-// Firebaseモードの設定
-// グローバル変数の設定状況を確認
+// Firebaseモードの設定 - 本番モードを強制
 console.log('Firebase認証モードの現在値:', (global as any).__FIREBASE_MODE__);
 
-// FIREBASE_MODE環境変数を取得
+// グローバル変数で本番モードを明示的に設定
+(global as any).__FIREBASE_MODE__ = 'production';
+(global as any).__FIREBASE_MOCK_MODE__ = false;
+(global as any).__FIREBASE_REAL_MODE__ = true;
+
+// FIREBASE_MODE環境変数を取得 (参照用)
 const envFirebaseMode = FIREBASE_MODE || process.env.FIREBASE_MODE;
 console.log('FIREBASE_MODE環境変数:', envFirebaseMode || 'なし');
+console.log('本番モードを強制的に設定しました');
 
-// モードを決定:
-// 1. グローバル変数が既に設定されている場合はそれを優先
-// 2. 環境変数がある場合はそれを使用
-// 3. 何もなければ常に本番モードをデフォルトに
-let firebaseMode;
-if ((global as any).__FIREBASE_MODE__ !== undefined) {
-  firebaseMode = (global as any).__FIREBASE_MODE__;
-  console.log('グローバル変数の設定値を使用:', firebaseMode);
-} else if (envFirebaseMode) {
-  firebaseMode = envFirebaseMode;
-  console.log('環境変数の設定値を使用:', firebaseMode);
-} else {
-  firebaseMode = 'production';
-  console.log('デフォルト値を使用（本番モード）:', firebaseMode);
-}
-
-// 設定をグローバル変数に保存
-(global as any).__FIREBASE_MODE__ = firebaseMode;
-(global as any).__FIREBASE_MOCK_MODE__ = firebaseMode === 'mock';
-(global as any).__FIREBASE_REAL_MODE__ = firebaseMode === 'production';
+// 本番モードを使用 (上記で既に設定済みのグローバル変数を利用)
+const firebaseMode = 'production';
+console.log('Firebase認証モードは本番モードに固定:', firebaseMode);
 
 console.log(`Firebase mode設定完了: ${firebaseMode}`);
 console.log('モックモード:', (global as any).__FIREBASE_MOCK_MODE__);

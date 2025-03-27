@@ -20,7 +20,7 @@ const isMockAuthMode = () => {
   if (typeof (global as any).__FIREBASE_MOCK_MODE__ === 'boolean') {
     return (global as any).__FIREBASE_MOCK_MODE__;
   }
-  // 設定されていなければ本番モード
+  // 設定されていなければ常に本番モード
   return false;
 };
 

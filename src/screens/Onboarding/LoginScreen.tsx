@@ -36,33 +36,42 @@ const LoginScreen: React.FC = () => {
 
     try {
       console.log('[Login] ログイン試行開始:', email);
+      
+      // グローバル変数の設定を強制
+      (global as any).__FIREBASE_MODE__ = 'production';
+      (global as any).__FIREBASE_MOCK_MODE__ = false;
+      (global as any).__FIREBASE_REAL_MODE__ = true;
+      
       const success = await login(email.trim(), password);
       
       if (success) {
         console.log('[Login] ログイン成功、メイン画面に遷移します');
         
-        // メイン画面に遷移する強制的なリセット
-        try {
-          // 不要な遅延をなくして即座に実行
-          const resetAction = CommonActions.reset({
-            index: 0,
-            routes: [{ name: ROUTES.MAIN }],
-          });
+        // Firebaseの認証状態を設定するため少し待つ
+        setTimeout(() => {
+          try {
+            console.log('[Login] 強制的に今日の探索画面へ遷移');
           
-          // グローバルにリセットを試みる
-          const nav = navigation.getParent() || navigation;
-          nav.dispatch(resetAction);
+            // 今日の探索画面(EXPLORATION_FLOW)に直接遷移
+            navigation.dispatch(
+              CommonActions.navigate({
+                name: ROUTES.MAIN,
+              })
+            );
+            
+            // 少し待ってから探索画面へ
+            setTimeout(() => {
+              navigation.navigate(ROUTES.EXPLORATION_FLOW);
+            }, 300);
+            
+          } catch (navError) {
+            console.error('[Login] ナビゲーションエラー:', navError);
           
-          console.log('[Login] 強制ナビゲーションリセット完了');
-        } catch (navError) {
-          console.error('[Login] ナビゲーションエラー:', navError);
-          
-          // フォールバック: 通常のナビゲーション
-          navigation.reset({
-            index: 0,
-            routes: [{ name: ROUTES.MAIN }],
-          });
-        }
+            // 最終手段: Appを再起動
+            console.log('[Login] ナビゲーション失敗、最終手段を試行');
+            alert('ログインに成功しました。アプリを再起動します。');
+          }
+        }, 500);
       } else if (error) {
         console.log('[Login] ログインエラー:', error);
         toast.show({
@@ -75,7 +84,7 @@ const LoginScreen: React.FC = () => {
       console.error('[Login] ログイン処理エラー:', err);
       toast.show({
         title: 'ログインエラー',
-        description: 'ログイン処理中にエラーが発生しました。FirebaseまたはFCMの初期化に問題がある可能性があります。',
+        description: 'ログイン処理中にエラーが発生しました。インターネット接続を確認し、再度お試しください。',
         status: 'error',
       });
     }

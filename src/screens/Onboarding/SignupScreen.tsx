@@ -77,26 +77,34 @@ const SignupScreen: React.FC = () => {
       if (success) {
         console.log('[Signup] サインアップ成功、体験レベル選択へ');
         
-        // 体験レベル選択画面に遷移する強制的なリセット
+        // 新規登録後はログイン画面に遷移し、ユーザーに明示的なログインを促す
         try {
-          // 不要な遅延をなくして即座に実行
+          // 成功メッセージを表示
+          toast.show({
+            title: '登録完了',
+            description: 'アカウントの作成が完了しました。ログインしてください。',
+            status: 'success',
+            duration: 3000
+          });
+          
+          // ログイン画面に遷移
           const resetAction = CommonActions.reset({
             index: 0,
-            routes: [{ name: ROUTES.EXPERIENCE_LEVEL }],
+            routes: [{ name: ROUTES.LOGIN }],
           });
           
           // グローバルにリセットを試みる
           const nav = navigation.getParent() || navigation;
           nav.dispatch(resetAction);
           
-          console.log('[Signup] 強制ナビゲーションリセット完了');
+          console.log('[Signup] 登録完了、ログイン画面に遷移');
         } catch (navError) {
           console.error('[Signup] ナビゲーションエラー:', navError);
           
           // フォールバック: 通常のナビゲーション
           navigation.reset({
             index: 0,
-            routes: [{ name: ROUTES.EXPERIENCE_LEVEL }],
+            routes: [{ name: ROUTES.LOGIN }],
           });
         }
       } else if (error) {
@@ -110,7 +118,7 @@ const SignupScreen: React.FC = () => {
       console.error('サインアップ処理エラー:', err);
       toast.show({
         title: '登録エラー',
-        description: 'サインアップ処理中にエラーが発生しました。開発環境では、Firebaseが正しく設定されていない可能性があります。',
+        description: 'サインアップ処理中にエラーが発生しました。インターネット接続を確認し、再度お試しください。',
         status: 'error',
       });
     }

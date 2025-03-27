@@ -61,24 +61,15 @@ const AppNavigator = () => {
 
   // 初期ルートを決定する関数
   const determineInitialRoute = () => {
-    // 初期ルートが既に設定されている場合はそれを返す
-    if (hasSetInitialRouteRef.current && initialRouteRef.current) {
-      return initialRouteRef.current;
+    // 強制的にメイン画面を返す - ユーザーが認証済みの場合
+    if (user) {
+      console.log('[AppNavigator] ユーザー認証済み、メイン画面に設定:', user.id);
+      return ROUTES.MAIN;
     }
-
-    if (!loading && initialized) {
-      if (user) {
-        // ユーザーが認証済みの場合
-        if (!user.experienceLevel) {
-          // 経験レベルが未設定の場合
-          return ROUTES.EXPERIENCE_LEVEL;
-        }
-        return ROUTES.MAIN;
-      }
-      // 未認証の場合はオンボーディングから開始
-      return ROUTES.ONBOARDING;
-    }
-    return null;
+    
+    // 認証されていない場合はオンボーディングから
+    console.log('[AppNavigator] 未認証、オンボーディング画面に設定');
+    return ROUTES.ONBOARDING;
   };
 
   // ルートが決定されたかを追跡する参照

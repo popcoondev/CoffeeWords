@@ -56,9 +56,9 @@ const HomeScreen: React.FC = () => {
     try {
       setLoading(true);
       
-      if (__DEV__) {
-        // 開発環境ではモックデータを利用
-        console.log('開発環境: モックデータを使用');
+      if ((global as any).__FIREBASE_MOCK_MODE__ === true) {
+        // モックモードの場合はモックデータを利用
+        console.log('モックモード: モックデータを使用');
         
         // モックの探検データ
         const now = new Date();
