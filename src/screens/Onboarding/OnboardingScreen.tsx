@@ -10,9 +10,6 @@ import { RootStackParamList } from '../../types';
 import { ROUTES } from '../../constants/routes';
 import { COLORS } from '../../constants/theme';
 
-// デバッグ用
-console.log('OnboardingScreen.tsxファイルが読み込まれました');
-
 // オンボーディングスライドの内容
 const slides = [
   {
@@ -35,19 +32,9 @@ const slides = [
 type OnboardingNavigationProp = NativeStackNavigationProp<RootStackParamList, 'Onboarding'>;
 
 const OnboardingScreen: React.FC = () => {
-  console.log('OnboardingScreen コンポーネントがレンダリングされました');
-  
+  // コンポーネントがマウントされたときに実行
   useEffect(() => {
-    console.log('OnboardingScreen マウントされました');
-    
-    // デバッグ用のアラート (開発時のみ)
-    if (__DEV__) {
-      Alert.alert('OnboardingScreen', 'オンボーディング画面が表示されました');
-    }
-    
-    return () => {
-      console.log('OnboardingScreen アンマウントされました');
-    };
+    // 何もしない (デバッグコードを削除)
   }, []);
   
   const [currentSlide, setCurrentSlide] = useState(0);

@@ -49,38 +49,14 @@ import ApiKeySettingScreen from '../screens/Preference/ApiKeySettingScreen';
 // コンポーネント
 import LoadingScreen from '../components/LoadingScreen';
 
-const Stack = createNativeStackNavigator<RootStackParamList>();
+// @ts-ignore - 型エラーを無視（React Navigation v7との互換性のため）
+const Stack = createNativeStackNavigator();
 
 const AppNavigator = () => {
   // すべてのhooksは条件分岐よりも前に宣言する
   const navigationRef = useRef<NavigationContainerRef<any>>(null);
   const { user, loading, initialized, error } = useAuth();
 
-  // useEffectもここで宣言しておく
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      if (navigationRef.current) {
-        const state = navigationRef.current.getRootState();
-        console.log('5秒後のナビゲーション状態:', JSON.stringify(state));
-        
-        const currentRoute = navigationRef.current.getCurrentRoute();
-        console.log('現在のルート:', currentRoute?.name);
-        
-        // デバッグ用アラート
-        if (__DEV__) {
-          Alert.alert(
-            'ナビゲーション状態', 
-            `現在のルート: ${currentRoute?.name || 'なし'}\n` +
-            `プラットフォーム: ${Platform.OS}`
-          );
-        }
-      } else {
-        console.log('navigationRefが利用できません');
-      }
-    }, 5000);
-    
-    return () => clearTimeout(timer);
-  }, []);
 
   console.log('AppNavigator: レンダリング開始', { loading, initialized, hasUser: !!user, hasError: !!error });
 
@@ -126,17 +102,6 @@ const AppNavigator = () => {
     return (
       <NavigationContainer
         ref={navigationRef}
-        onStateChange={(state) => {
-          console.log('Navigation状態変更:', 
-            state?.routes[state.index]?.name || 'unknown',
-            'index:', state?.index || 'unknown'
-          );
-        }}
-        onReady={() => {
-          console.log('NavigationContainer準備完了');
-          const currentRouteName = navigationRef.current?.getCurrentRoute()?.name;
-          console.log('初期ルート:', currentRouteName);
-        }}
       >
         <Stack.Navigator 
           initialRouteName={initialRoute}
@@ -150,24 +115,20 @@ const AppNavigator = () => {
             name={ROUTES.ONBOARDING} 
             component={OnboardingScreen} 
             options={{ gestureEnabled: false }}
-            listeners={{ focus: () => console.log('OnboardingScreen FOCUSED') }}
           />
           <Stack.Screen 
             name={ROUTES.LOGIN} 
             component={LoginScreen} 
             options={{ gestureEnabled: true }}
-            listeners={{ focus: () => console.log('LoginScreen FOCUSED') }}
           />
           <Stack.Screen 
             name={ROUTES.SIGNUP} 
             component={SignupScreen} 
             options={{ gestureEnabled: true }}
-            listeners={{ focus: () => console.log('SignupScreen FOCUSED') }}
           />
           <Stack.Screen 
             name={ROUTES.EXPERIENCE_LEVEL} 
             component={ExperienceLevelScreen} 
-            listeners={{ focus: () => console.log('ExperienceLevelScreen FOCUSED') }}
           />
           
           {/* メイン */}
@@ -175,48 +136,40 @@ const AppNavigator = () => {
             name={ROUTES.MAIN} 
             component={MainTabNavigator} 
             options={{ gestureEnabled: false }}
-            listeners={{ focus: () => console.log('MainTabNavigator FOCUSED') }}
           />
           
           {/* 探検フロー */}
           <Stack.Screen 
             name={ROUTES.EXPLORATION_FLOW} 
             component={ExplorationInfoScreen} 
-            listeners={{ focus: () => console.log('ExplorationInfoScreen FOCUSED') }}
           />
           <Stack.Screen 
             name={ROUTES.EXPLORATION_TASTE_MAP} 
             component={ExplorationTasteMapScreen} 
-            listeners={{ focus: () => console.log('ExplorationTasteMapScreen FOCUSED') }}
           />
           <Stack.Screen 
             name={ROUTES.EXPLORATION_PREFERENCES} 
             component={ExplorationPreferencesScreen} 
-            listeners={{ focus: () => console.log('ExplorationPreferencesScreen FOCUSED') }}
           />
           <Stack.Screen 
             name={ROUTES.EXPLORATION_COMPARISON} 
             component={ExplorationComparisonScreen} 
-            listeners={{ focus: () => console.log('ExplorationComparisonScreen FOCUSED') }}
           />
           <Stack.Screen 
             name={ROUTES.EXPLORATION_RESULT} 
             component={ExplorationResultScreen} 
-            listeners={{ focus: () => console.log('ExplorationResultScreen FOCUSED') }}
           />
           
           {/* 設定画面 */}
           <Stack.Screen 
             name={ROUTES.API_KEY_SETTINGS} 
             component={ApiKeySettingScreen} 
-            listeners={{ focus: () => console.log('ApiKeySettingScreen FOCUSED') }}
           />
           
           {/* 後方互換性のための旧ルート */}
           <Stack.Screen 
             name={ROUTES.COFFEE_RECORD_FLOW} 
             component={ExplorationInfoScreen} 
-            listeners={{ focus: () => console.log('旧CoffeeRecordFlow FOCUSED -> ExplorationInfoScreen') }}
           />
         </Stack.Navigator>
       </NavigationContainer>

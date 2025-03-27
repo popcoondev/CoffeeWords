@@ -9,6 +9,7 @@ import CoffeeInfoScreen from '../screens/CoffeeRecord/CoffeeInfoScreen';
 import CoffeeTasteScreen from '../screens/CoffeeRecord/CoffeeTasteScreen';
 import CoffeeResultScreen from '../screens/CoffeeRecord/CoffeeResultScreen';
 
+// @ts-ignore - React Navigation v7との互換性のため
 const CoffeeRecordStack = createNativeStackNavigator();
 
 /**

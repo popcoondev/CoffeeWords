@@ -24,7 +24,6 @@ export type RootStackParamList = {
   Main: undefined;
   Home: { decodeResult?: DecodeResult };
   Dictionary: { newDiscovery?: DiscoveredFlavor };
-  TranslationDictionary: { newDiscovery?: DiscoveredFlavor };
   TasteMap: undefined;
   
   // 探検フロー (旧コーヒー記録フロー)
@@ -51,7 +50,7 @@ export type RootStackParamList = {
   };
   
   // 翻訳辞書 (旧辞典)
-  TranslationDictionary: undefined;
+  TranslationDictionary: { newDiscovery?: DiscoveredFlavor };
   TermDetail: { termId: string };
   TermEdit: { termId: string; termData: DictionaryTerm };
   TranslationTool: undefined;
