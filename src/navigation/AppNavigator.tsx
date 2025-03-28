@@ -23,6 +23,7 @@ import LoginScreen from '../screens/Onboarding/LoginScreen';
 import SignupScreen from '../screens/Onboarding/SignupScreen';
 
 // 探検フロー
+import ExplorationFlowScreen from '../screens/Exploration/ExplorationFlowScreen';
 import ExplorationInfoScreen from '../screens/Exploration/ExplorationInfoScreen';
 import ExplorationTasteMapScreen from '../screens/Exploration/ExplorationTasteMapScreen';
 import ExplorationPreferencesScreen from '../screens/Exploration/ExplorationPreferencesScreen';
@@ -43,8 +44,8 @@ import TasteMapScreen from '../screens/TasteMap/TasteMapScreen';
 // import ExplorationHistoryScreen from '../screens/TasteMap/ExplorationHistoryScreen';
 
 // ミッション
-// import MissionsScreen from '../screens/Missions/MissionsScreen';
-// import MissionDetailScreen from '../screens/Missions/MissionDetailScreen';
+import MissionsScreen from '../screens/Missions/MissionsScreen';
+import MissionDetailScreen from '../screens/Missions/MissionDetailScreen';
 
 // 設定
 import ApiKeySettingScreen from '../screens/Preference/ApiKeySettingScreen';
@@ -216,7 +217,7 @@ const AppNavigator = () => {
           {/* 探検フロー */}
           <Stack.Screen 
             name={ROUTES.EXPLORATION_FLOW} 
-            component={ExplorationInfoScreen} 
+            component={ExplorationFlowScreen} 
           />
           <Stack.Screen 
             name={ROUTES.EXPLORATION_TASTE_MAP} 
@@ -239,6 +240,16 @@ const AppNavigator = () => {
           <Stack.Screen 
             name={ROUTES.API_KEY_SETTINGS} 
             component={ApiKeySettingScreen} 
+          />
+          
+          {/* ミッション関連 */}
+          <Stack.Screen
+            name={ROUTES.MISSIONS}
+            component={MissionsScreen}
+          />
+          <Stack.Screen
+            name={ROUTES.MISSION_DETAIL}
+            component={MissionDetailScreen}
           />
           
           {/* 後方互換性のための旧ルート */}

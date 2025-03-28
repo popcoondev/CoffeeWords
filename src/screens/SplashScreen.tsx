@@ -1,121 +1,109 @@
 import React, { useEffect } from 'react';
-import { Image, StyleSheet, View } from 'react-native';
-import { Box, Center, Text, Spinner, VStack } from 'native-base';
+import { Image, StyleSheet } from 'react-native';
+import { Box, Text, VStack, Center, Spinner } from 'native-base';
 import { useNavigation, CommonActions } from '@react-navigation/native';
-import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 
-import { COLORS } from '../constants/theme';
 import { ROUTES } from '../constants/routes';
-import { RootStackParamList } from '../types';
+import { COLORS } from '../constants/theme';
 import { useAuth } from '../hooks/useAuth';
-
-// ナビゲーション型定義
-type SplashScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'Splash'>;
 
 /**
  * スプラッシュ画面
- * アプリ起動時の初期化処理とユーザー認証状態の確認を行う
+ * アプリ起動時に表示され、認証状態を確認してから適切な画面に遷移する
  */
 const SplashScreen: React.FC = () => {
-  const navigation = useNavigation<SplashScreenNavigationProp>();
-  const { user, initialized, loading } = useAuth();
-
-  // マウント時に実行する処理
+  const navigation = useNavigation();
+  const { user, loading, initialized, error } = useAuth();
+  
+  // 認証状態に基づいて適切な画面に遷移
   useEffect(() => {
-    console.log('[Splash] スプラッシュ画面表示');
+    console.log('[SplashScreen] 認証状態チェック', { loading, initialized, hasUser: !!user });
     
-    // タイマーを設定して一定時間後に画面遷移
-    const timer = setTimeout(() => {
-      console.log('[Splash] タイマー経過、画面遷移判定 (initialized:', initialized, ', loading:', loading, ')');
+    if (!initialized) {
+      console.log('[SplashScreen] 認証初期化待機中...');
+      return;
+    }
+    
+    if (loading) {
+      console.log('[SplashScreen] 認証情報読み込み中...');
+      return;
+    }
+    
+    // 遷移先を決定
+    let nextRouteName = ROUTES.ONBOARDING;
+    
+    if (user) {
+      console.log('[SplashScreen] ユーザー認証済み UID:', user.id);
       
-      if (initialized) {
-        // 認証状態に基づいて適切な画面に遷移
-        console.log('[Splash] 認証状態確認:', !!user);
-        
-        let targetRoute;
-        if (user) {
-          // ユーザーがログイン済みの場合
-          console.log('[Splash] ユーザーログイン済み:', user.id);
-          
-          if (!user.experienceLevel) {
-            // 経験レベルが未設定の場合は経験レベル設定画面へ
-            console.log('[Splash] 経験レベル未設定、経験レベル設定画面へ');
-            targetRoute = ROUTES.EXPERIENCE_LEVEL;
-          } else {
-            // 経験レベルが設定済みの場合はメイン画面へ
-            console.log('[Splash] メイン画面へ遷移');
-            targetRoute = ROUTES.MAIN;
-          }
-        } else {
-          // 未ログインの場合はオンボーディング画面へ
-          console.log('[Splash] 未ログイン、オンボーディング画面へ');
-          targetRoute = ROUTES.ONBOARDING;
-        }
-        
-        // 画面遷移の実行
-        navigation.dispatch(
-          CommonActions.reset({
-            index: 0,
-            routes: [{ name: targetRoute }],
-          })
-        );
-        
-        console.log(`[Splash] 画面遷移完了: ${targetRoute}`);
+      // 経験レベルが設定されていない場合はオンボーディングへ
+      if (!user.experienceLevel) {
+        console.log('[SplashScreen] 経験レベル未設定 -> 経験レベル設定画面へ');
+        nextRouteName = ROUTES.EXPERIENCE_LEVEL;
       } else {
-        // 初期化未完了の場合は一定時間後に強制遷移
-        console.log('[Splash] 初期化未完了、5秒後に強制遷移');
-        
-        setTimeout(() => {
-          navigation.dispatch(
-            CommonActions.reset({
-              index: 0,
-              routes: [{ name: ROUTES.ONBOARDING }],
-            })
-          );
-          console.log('[Splash] 強制遷移実行: オンボーディング画面');
-        }, 5000);
+        // 認証済みかつ経験レベルも設定済みならメイン画面へ
+        console.log('[SplashScreen] ユーザー設定完了 -> メイン画面へ');
+        nextRouteName = ROUTES.MAIN;
       }
-    }, 2000); // 2秒間スプラッシュ画面を表示
+    } else {
+      // 未認証の場合はオンボーディングへ
+      console.log('[SplashScreen] 未認証 -> オンボーディング画面へ');
+      nextRouteName = ROUTES.ONBOARDING;
+    }
     
+    console.log('[SplashScreen] 遷移先決定:', nextRouteName);
+    
+    // 1秒待ってから画面遷移（スプラッシュ画面を少し表示するため）
+    const timer = setTimeout(() => {
+      console.log('[SplashScreen] 画面遷移実行:', nextRouteName);
+      navigation.dispatch(
+        CommonActions.reset({
+          index: 0,
+          routes: [{ name: nextRouteName }]
+        })
+      );
+    }, 1000);
+    
+    // クリーンアップ
     return () => clearTimeout(timer);
-  }, [user, initialized, loading, navigation]);
-
+  }, [navigation, user, loading, initialized]);
+  
   return (
-    <Box flex={1} bg={COLORS.background.primary}>
-      <Center flex={1}>
-        <VStack space={8} alignItems="center">
-          <Image
-            source={require('../../assets/splash-icon.png')}
-            style={styles.logo}
-            resizeMode="contain"
-          />
-          <Text
-            fontSize="3xl"
-            fontWeight="bold"
-            color={COLORS.primary[500]}
-          >
-            CoffeeWords
-          </Text>
-          <Text fontSize="md" color={COLORS.text.secondary} mb={4}>
-            あなたのコーヒー体験を言葉にする
-          </Text>
-          <Box mt={4}>
-            <Spinner size="lg" color={COLORS.primary[500]} />
-            <Text fontSize="xs" color={COLORS.text.light} mt={6} textAlign="center">
-              初期化中...
+    <Box flex={1} bg={COLORS.primary[500]} safeArea justifyContent="center" alignItems="center">
+      <VStack space={8} alignItems="center">
+        {/* ロゴまたはアイコン */}
+        <Image
+          source={require('../../assets/splash-icon.png')}
+          style={styles.logo}
+          resizeMode="contain"
+        />
+        
+        {/* アプリ名 */}
+        <Text fontSize="3xl" fontWeight="bold" color="white">
+          Coffee Words
+        </Text>
+        
+        {/* ローディングインジケーター */}
+        <Box mt={6}>
+          <Spinner size="lg" color="white" />
+        </Box>
+        
+        {/* 初期化エラーがある場合 */}
+        {error && (
+          <Box mt={4} px={4}>
+            <Text color="white" textAlign="center">
+              {error}
             </Text>
           </Box>
-        </VStack>
-      </Center>
+        )}
+      </VStack>
     </Box>
   );
 };
 
-// スタイル定義
 const styles = StyleSheet.create({
   logo: {
-    width: 160,
-    height: 160,
+    width: 150,
+    height: 150,
   },
 });
 

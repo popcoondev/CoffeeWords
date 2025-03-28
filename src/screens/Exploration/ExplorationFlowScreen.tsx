@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from 'react';
-import { Box, VStack, Heading, Text, Button, Icon, Image, Center, useToast } from 'native-base';
+import { Box, VStack, Heading, Text, Button, Icon, HStack, Center, useToast } from 'native-base';
 import { useNavigation, useRoute, CommonActions } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 
 import { COLORS } from '../../constants/theme';
 import { ROUTES } from '../../constants/routes';
 import { useAuth } from '../../hooks/useAuth';
-import { ScreenProps } from '../../types';
+import { ScreenProps, Mission } from '../../types';
 import { useMissionStore } from '../../store/useMissionStore';
 import { useExplorationStore } from '../../store/useExplorationStore';
 
@@ -15,20 +15,24 @@ import { useExplorationStore } from '../../store/useExplorationStore';
  * 探検記録のためのフロー開始と説明を表示
  */
 const ExplorationFlowScreen: React.FC = () => {
-  const navigation = useNavigation();
-  const route = useRoute();
+  const navigation = useNavigation<ScreenProps<'ExplorationFlow'>['navigation']>();
+  const route = useRoute<ScreenProps<'ExplorationFlow'>['route']>();
   const toast = useToast();
   const { user } = useAuth();
   
   // ミッションストア
-  const { activeMissions, fetchActiveMissions } = useMissionStore();
+  const { 
+    activeMissions, 
+    selectedMission, 
+    fetchActiveMissions, 
+    setSelectedMission 
+  } = useMissionStore();
   
   // 探検ストア
   const { resetExploration } = useExplorationStore();
   
   // 関連ミッション (パラメーターから取得)
   const { missionId, previousCoffeeId } = route.params || {};
-  const [selectedMission, setSelectedMission] = useState(null);
   
   // ローディング状態
   const [loading, setLoading] = useState(false);
@@ -45,10 +49,17 @@ const ExplorationFlowScreen: React.FC = () => {
           const mission = missions.find(m => m.id === missionId);
           if (mission) {
             setSelectedMission(mission);
+          } else {
+            console.warn('Specified mission not found:', missionId);
           }
         })
         .catch(error => {
           console.error('Failed to fetch missions:', error);
+          toast.show({
+            title: "エラー",
+            description: "ミッション情報の取得に失敗しました",
+            status: "error"
+          });
         })
         .finally(() => {
           setLoading(false);
