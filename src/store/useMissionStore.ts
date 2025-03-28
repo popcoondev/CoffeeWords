@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { Mission } from '../types';
+import { getUserActiveMissions } from '../services/firebase/mission';
 
 // ミッションを管理するStore
 interface MissionState {
@@ -11,6 +12,8 @@ interface MissionState {
   selectedMission: Mission | null;
   // ローディング状態
   loading: boolean;
+  // エラー状態
+  error: string | null;
   
   // アクション
   setActiveMissions: (missions: Mission[]) => void;
@@ -20,15 +23,20 @@ interface MissionState {
   updateMission: (missionId: string, updates: Partial<Mission>) => void;
   completeMission: (missionId: string) => void;
   setLoading: (loading: boolean) => void;
+  setError: (error: string | null) => void;
+  
+  // ミッションデータ取得
+  fetchActiveMissions: (userId: string) => Promise<Mission[]>;
 }
 
 // Storeの作成
-export const useMissionStore = create<MissionState>((set) => ({
+export const useMissionStore = create<MissionState>((set, get) => ({
   // 初期状態
   activeMissions: [],
   completedMissions: [],
   selectedMission: null,
   loading: false,
+  error: null,
   
   // アクション
   setActiveMissions: (missions) => set({
@@ -75,4 +83,29 @@ export const useMissionStore = create<MissionState>((set) => ({
   setLoading: (loading) => set({
     loading,
   }),
+  
+  setError: (error) => set({
+    error,
+  }),
+  
+  // ミッションデータ取得
+  fetchActiveMissions: async (userId: string) => {
+    try {
+      set({ loading: true, error: null });
+      
+      // APIからミッション取得
+      const missions = await getUserActiveMissions(userId);
+      set({ activeMissions: missions });
+      
+      return missions;
+    } catch (error) {
+      console.error('Failed to fetch missions:', error);
+      set({ 
+        error: error instanceof Error ? error.message : '未知のエラーが発生しました' 
+      });
+      return [];
+    } finally {
+      set({ loading: false });
+    }
+  },
 }));
