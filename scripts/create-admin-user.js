@@ -1,160 +1,96 @@
 /**
- * Firebase 管理者ユーザー作成スクリプト
+ * テストユーザー作成スクリプト
  * 
- * このスクリプトは管理者ユーザーを作成し、必要な権限を付与します。
+ * このスクリプトは、Firebase Authenticationを使用して
+ * テスト用のユーザーアカウントを作成します。
  * 
- * 使い方:
- * 1. node scripts/create-admin-user.js
+ * 使用方法:
+ * 1. アプリをローカルで実行
+ * 2. コンソールにこのスクリプトをコピーして実行
  */
 
-const admin = require('firebase-admin');
-const serviceAccount = require('../serviceAccountKey.json');
-const readline = require('readline');
+// テストユーザー情報
+const TEST_USER = {
+  email: 'admin@example.com',
+  password: 'admin123',
+  displayName: '管理者ユーザー',
+  experienceLevel: 'advanced'
+};
 
-// Firebase Admin初期化
-admin.initializeApp({
-  credential: admin.credential.cert(serviceAccount)
-});
+// ユーザー作成関数
+const createAdminUser = async () => {
+  try {
+    console.log('管理者ユーザー作成を開始します...');
+    
+    // Firebaseがすでに初期化されているか確認
+    let auth, db;
+    try {
+      auth = firebase.auth();
+      db = firebase.firestore();
+    } catch (error) {
+      console.error('Firebase SDKが見つかりません。このスクリプトはFirebase SDKが初期化されているアプリ内で実行する必要があります。', error);
+      return false;
+    }
+    
+    // ユーザー作成ロジック
+    let userId;
+    
+    try {
+      // 既存のユーザーかどうかをチェック
+      try {
+        console.log(`ユーザー ${TEST_USER.email} でログイン試行...`);
+        const userCredential = await auth.signInWithEmailAndPassword(TEST_USER.email, TEST_USER.password);
+        userId = userCredential.user.uid;
+        console.log(`既存ユーザー ${TEST_USER.email} でログインしました (ID: ${userId})`);
+        return { success: true, userId, message: `既存ユーザー ${TEST_USER.email} でログインしました` };
+      } catch (loginError) {
+        // ログインに失敗したら新規作成
+        if (loginError.code === 'auth/user-not-found') {
+          console.log(`ユーザー ${TEST_USER.email} は存在しないため新規作成します...`);
+          const userCredential = await auth.createUserWithEmailAndPassword(TEST_USER.email, TEST_USER.password);
+          userId = userCredential.user.uid;
+          
+          // 表示名を更新
+          await userCredential.user.updateProfile({
+            displayName: TEST_USER.displayName
+          });
+          
+          console.log(`ユーザー ${TEST_USER.email} を作成しました (ID: ${userId})`);
+          
+          // プロファイルデータをFirestoreに保存
+          await db.collection('users').doc(userId).set({
+            id: userId,
+            email: TEST_USER.email,
+            displayName: TEST_USER.displayName,
+            experienceLevel: TEST_USER.experienceLevel,
+            createdAt: firebase.firestore.FieldValue.serverTimestamp()
+          });
+          
+          console.log(`ユーザー ${TEST_USER.email} のプロファイルを作成しました`);
+          return { success: true, userId, message: `ユーザー ${TEST_USER.email} を新規作成しました` };
+        } else {
+          throw loginError;
+        }
+      }
+    } catch (error) {
+      console.error(`ユーザー処理中にエラーが発生しました: ${error}`);
+      return { success: false, error: error.message };
+    }
+  } catch (error) {
+    console.error(`予期せぬエラーが発生しました: ${error}`);
+    return { success: false, error: error.message };
+  }
+};
 
-// Firestore参照を取得
-const db = admin.firestore();
-// Authentication参照を取得
-const auth = admin.auth();
+// Node.js環境でのスクリプト実行用（ブラウザでは不要）
+if (typeof module !== 'undefined') {
+  module.exports = { createAdminUser };
+}
 
-// CLIインターフェース
-const rl = readline.createInterface({
-  input: process.stdin,
-  output: process.stdout
-});
-
-/**
- * ユーザー入力を受け取る
- */
-function promptUser(question) {
-  return new Promise((resolve) => {
-    rl.question(question, (answer) => {
-      resolve(answer);
-    });
+// ブラウザで実行
+if (typeof window !== 'undefined') {
+  createAdminUser().then(result => {
+    console.log('結果:', result);
+    alert(`ユーザー作成${result.success ? '成功' : '失敗'}: ${result.message || result.error}`);
   });
 }
-
-/**
- * 管理者ユーザー作成
- */
-async function createAdminUser(email, password, displayName) {
-  try {
-    // ユーザーが既に存在するか確認
-    try {
-      const userRecord = await auth.getUserByEmail(email);
-      console.log(`ユーザーは既に存在します: ${email} (${userRecord.uid})`);
-      
-      // カスタムクレームを設定（管理者権限）
-      await auth.setCustomUserClaims(userRecord.uid, { admin: true });
-      console.log(`管理者権限を付与しました: ${userRecord.uid}`);
-      
-      return userRecord;
-    } catch (error) {
-      // ユーザーが存在しない場合は新規作成
-      if (error.code === 'auth/user-not-found') {
-        const userRecord = await auth.createUser({
-          email,
-          password,
-          displayName,
-          emailVerified: true,
-        });
-        console.log(`新しいユーザーを作成しました: ${email} (${userRecord.uid})`);
-        
-        // カスタムクレームを設定（管理者権限）
-        await auth.setCustomUserClaims(userRecord.uid, { admin: true });
-        console.log(`管理者権限を付与しました: ${userRecord.uid}`);
-        
-        return userRecord;
-      }
-      throw error;
-    }
-  } catch (error) {
-    console.error('ユーザー作成エラー:', error);
-    throw error;
-  }
-}
-
-/**
- * ユーザープロフィール作成
- */
-async function createUserProfile(userId, userData) {
-  try {
-    // ユーザードキュメントが既に存在するか確認
-    const userRef = db.collection('users').doc(userId);
-    const doc = await userRef.get();
-    
-    if (doc.exists) {
-      // 既存のユーザープロファイルを更新
-      await userRef.update({
-        ...userData,
-        role: 'admin',
-        updatedAt: admin.firestore.FieldValue.serverTimestamp()
-      });
-      console.log(`ユーザープロファイルを更新しました: ${userId}`);
-    } else {
-      // 新しいユーザープロファイルを作成
-      await userRef.set({
-        ...userData,
-        id: userId,
-        role: 'admin',
-        createdAt: admin.firestore.FieldValue.serverTimestamp(),
-        updatedAt: admin.firestore.FieldValue.serverTimestamp()
-      });
-      console.log(`新しい管理者プロファイルを作成しました: ${userId}`);
-    }
-  } catch (error) {
-    console.error('ユーザープロファイル作成エラー:', error);
-    throw error;
-  }
-}
-
-/**
- * インタラクティブに管理者ユーザーを作成
- */
-async function createAdminUserInteractive() {
-  try {
-    console.log('Firebase 管理者ユーザー作成ツール');
-    console.log('--------------------------------');
-    
-    const email = await promptUser('メールアドレスを入力してください: ');
-    const password = await promptUser('パスワードを入力してください（8文字以上）: ');
-    const displayName = await promptUser('表示名を入力してください: ');
-    
-    if (!email || !password || !displayName) {
-      console.error('すべての情報を入力してください。');
-      process.exit(1);
-    }
-    
-    if (password.length < 8) {
-      console.error('パスワードは8文字以上である必要があります。');
-      process.exit(1);
-    }
-    
-    // 管理者ユーザーの作成
-    const adminUser = await createAdminUser(email, password, displayName);
-    
-    // 管理者プロファイルの作成
-    await createUserProfile(adminUser.uid, {
-      displayName,
-      email,
-      experienceLevel: 'advanced',
-      photoURL: null
-    });
-    
-    console.log(`管理者ユーザー ${email} の作成が完了しました。`);
-  } catch (error) {
-    console.error('管理者ユーザー作成エラー:', error);
-  } finally {
-    // CLIインターフェースを終了
-    rl.close();
-    // Firebase接続を終了
-    process.exit(0);
-  }
-}
-
-// スクリプト実行
-createAdminUserInteractive();

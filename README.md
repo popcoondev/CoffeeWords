@@ -74,7 +74,22 @@ FIREBASE_MEASUREMENT_ID=your_measurement_id
 
 Firebaseプロジェクトの詳細なセットアップについては、[Firebase Setup Guide](docs/firebase_setup.md)を参照してください。
 
-5. アプリの起動
+5. テストデータの作成 (オプション)
+
+テスト用のデータを作成するには、以下のスクリプトを使用できます：
+
+```bash
+# ユーザーとデータを作成（Node.js環境）
+node scripts/create-test-data.js
+
+# ブラウザコンソールから実行する場合
+# 1. アプリを起動してブラウザのコンソールを開く
+# 2. scripts/create-test-data-simple.js の内容をコンソールに貼り付けて実行
+```
+
+詳しくは [scripts/README.md](scripts/README.md) を参照してください。
+
+6. アプリの起動
 
 ```bash
 npx expo start
